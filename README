@@ -1,4 +1,4 @@
-Net::Gadu version 0.8
+Net::Gadu version 0.10
 ====================
 
 The README is used to introduce the module and provide instructions on
@@ -28,7 +28,6 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Put the correct copyright and licence information here.
-
-Copyright (C) 2002 Marcin Krzyzanowski
+Copyright (C) 2002-2005 Marcin Krzyzanowski
+Licence : LGPL
 

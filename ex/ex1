@@ -27,6 +27,10 @@ while (1) {
 
 	my $type = $e->{type};
 	
+	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
+	    die "Connection failed";
+	}
+	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
 	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :) ");

@@ -7,3 +7,4 @@ README
 test.pl
 ex/ex1
 contrib/irssi_gg.pl
+META.yml                                 Module meta-data (added by MakeMaker)

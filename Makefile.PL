@@ -7,7 +7,7 @@ WriteMakefile(
       (ABSTRACT_FROM => 'Gadu.pm', # retrieve abstract from module
        AUTHOR     => 'Marcin Krzyzanowski') : ()),
     'LIBS'		=> ['-lgadu'],
-    'DEFINE'		=> '-ggdb',
+#    'DEFINE'		=> '-ggdb',
     'INC'		=> '-I/usr/local/include -L/usr/local/lib -L./', # e.g., '-I/usr/include/other'
     # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
 );

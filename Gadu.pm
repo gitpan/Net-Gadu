@@ -17,7 +17,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.9';
+our $VERSION = '0.10';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -35,7 +35,7 @@ bootstrap Net::Gadu $VERSION;
 sub new {
     my ($c, %args) = @_;
     my $class = ref($c) || $c;
-    if (!exists($args{server})) { $args{server} = "217.17.41.84"; }
+    if (!exists($args{server})) { $args{server} = "217.17.41.88"; }
     if (!exists($args{async})) { $args{async} = 0; }
     bless \%args, $class;
 }
@@ -258,17 +258,21 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     ## LOGIN
     $gg->login("12121212","password") or die "Login error\n";
 
-    ## EVENTS(this example, after successful login change status, send message and logout
+    ## EVENTS this example, after successful login change status, send message and logout
     while (1) {
       while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
 	my $type = $e->{type};
+
+	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
+	    die "Connection failed";
+	}
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
-	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :))");
+	    $gg->send_message_chat("42112","dziekuje za Net::Gadu");
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {

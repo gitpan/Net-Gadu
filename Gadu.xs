@@ -21,35 +21,38 @@ gg_check_event(sess)
 	Sgg_session	sess;
     PREINIT:
 	int	ret = 0;
-	fd_set rd, wr, ex;
+	fd_set rd, wr;
 	struct timeval	tv;
     CODE:
 	
 	    FD_ZERO(&rd);
 	    FD_ZERO(&wr);
-	    FD_ZERO(&ex);
-
-    	    if ((sess->check & GG_CHECK_READ))
+	    
+	    if ((sess->state != GG_STATE_ERROR) &&
+		   (sess->state != GG_STATE_DONE) &&
+		   (sess->state != GG_STATE_IDLE))
+	    {
+    		    if ((sess->check & GG_CHECK_READ))
 			FD_SET(sess->fd, &rd);
 
-	    if ((sess->check & GG_CHECK_WRITE))
+		    if ((sess->check & GG_CHECK_WRITE))
 			FD_SET(sess->fd, &wr);
-
-	    FD_SET(sess->fd, &ex);
+	    }
 
 	    tv.tv_sec = 0;
-	    tv.tv_usec = 10;
-	    if (select(sess->fd + 1, &rd, &wr, &ex, &tv) == -1) {
-			ret = 0;
-			}
-
-	    if (FD_ISSET(sess->fd, &ex)) {
-			ret = 0;
-			}
-
-
-	    if (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr))
-		    ret = 1;
+	    tv.tv_usec = 100;
+		
+	    if (select(sess->fd + 1, &rd, &wr, NULL, &tv) == -1) 
+	    {
+		    ret = 0;
+	    } 
+	     else if (sess->state != GG_STATE_IDLE && (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr)))
+	    {
+	        ret = 1;
+	    }
+		
+	    if (sess->state == GG_STATE_IDLE)
+		    ret = 0;
 
 	RETVAL = ret;
     OUTPUT:
