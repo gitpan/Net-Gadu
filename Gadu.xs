@@ -21,12 +21,10 @@ gg_check_event(sess)
 	Sgg_session	sess;
     PREINIT:
 	int	ret = 0;
+	fd_set rd, wr, ex;
+	struct timeval	tv;
     CODE:
 	
-	if ((sess != NULL) && 
-	    (sess->status != GG_STATUS_NOT_AVAIL) && 
-	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR)) {
-	    fd_set rd, wr, ex;
 	    FD_ZERO(&rd);
 	    FD_ZERO(&wr);
 	    FD_ZERO(&ex);
@@ -39,17 +37,19 @@ gg_check_event(sess)
 
 	    FD_SET(sess->fd, &ex);
 
-	    if (select(sess->fd + 1, &rd, &wr, &ex, NULL) == -1)
+	    tv.tv_sec = 0;
+	    tv.tv_usec = 10;
+	    if (select(sess->fd + 1, &rd, &wr, &ex, &tv) == -1) {
 			ret = 0;
+			}
 
-	    if (FD_ISSET(sess->fd, &ex))
+	    if (FD_ISSET(sess->fd, &ex)) {
 			ret = 0;
+			}
 
 
 	    if (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr))
 		    ret = 1;
-	} else 
-	    ret = 0;
 
 	RETVAL = ret;
     OUTPUT:

@@ -3,6 +3,7 @@ package Net::Gadu;
 use 5.006;
 use strict;
 use warnings;
+use Socket;
 
 require Exporter;
 require DynaLoader;
@@ -16,7 +17,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.6';
+our $VERSION = '0.7';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -139,7 +140,7 @@ biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.6.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.7.tar.gz
 
 =head1 METHODS
 
@@ -149,8 +150,8 @@ Dostepne metody :
 
 =item $gg = new Net::Gadu(server => "server_ip")
 
-    opcjonalny parametr : server   (ip alternatywnego serwera)
-			  async = 1 lub 0   (komunikacja asynchroniczna)
+    opcjonalny parametr : server => "11.11.11.11"  (ip alternatywnego serwera)
+			  async => 1 lub 0   (komunikacja asynchroniczna)
 
 =item $gg->login(uin, password);
 
@@ -210,16 +211,16 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
     Dostepne kody zdarzen :
     
-    $Net::Gadu::EVENT_NONE = 0
-    $Net::Gadu::EVENT_MSG = 1
-    $Net::Gadu::EVENT_NOTIFY = 2
-    $Net::Gadu::EVENT_NOTIFY_DESCR = 3
-    $Net::Gadu::EVENT_STATUS = 4
-    $Net::Gadu::EVENT_ACK = 5
-    $Net::Gadu::EVENT_PONG = 6
-    $Net::Gadu::EVENT_CONN_FAILED = 7
-    $Net::Gadu::EVENT_CONN_SUCCESS = 8
-    $Net::Gadu::EVENT_DISCONNECT = 9
+    $Net::Gadu::EVENT_NONE
+    $Net::Gadu::EVENT_MSG
+    $Net::Gadu::EVENT_NOTIFY
+    $Net::Gadu::EVENT_NOTIFY_DESCR
+    $Net::Gadu::EVENT_STATUS
+    $Net::Gadu::EVENT_ACK
+    $Net::Gadu::EVENT_PONG
+    $Net::Gadu::EVENT_CONN_FAILED
+    $Net::Gadu::EVENT_CONN_SUCCESS 
+    $Net::Gadu::EVENT_DISCONNECT
 
 
 =back
@@ -230,7 +231,6 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
     #!/usr/bin/perl
 
-    use ExtUtils::testlib;
     use Net::Gadu;
 
     my $gg = new Net::Gadu(async=>1);
@@ -249,7 +249,8 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     $gg->login("12121212","password") or die "Login error\n";
 
     ## EVENTS(this example, after successful login change status, send message and logout
-    while ($gg->check_event() == 1) {
+    while (1) {
+      while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
@@ -268,7 +269,8 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 	if ($type == $Net::Gadu::EVENT_ACK) {
 	    $gg->logoff();
 	}
-	
+
+      }
     }
 
 =back

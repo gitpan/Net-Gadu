@@ -20,7 +20,8 @@ foreach my $a (@{$res}) {
 $gg->login("111111","password") or die "Login error\n";
 
 ## EVENTS(this example, after successful login change status, send message and logout
-while ($gg->check_event() == 1) {
+while (1) {
+    while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
@@ -37,8 +38,9 @@ while ($gg->check_event() == 1) {
 	
 
 	if ($type == $Net::Gadu::EVENT_ACK) {
-	    $gg->logoff();
+#	    $gg->logoff();
 	}
+    }
 }
 
 ## LOGOFF
