@@ -17,7 +17,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -140,7 +140,7 @@ biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.9.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.11.tar.gz
 
 =head1 METHODS
 
