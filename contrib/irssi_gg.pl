@@ -158,6 +158,27 @@ sub cmd_finduin {
     }
 }
 
+Irssi::command_bind('list','cmd_list','gg');
+sub cmd_list {
+	foreach my $n (keys %nicks) {
+    	    my $res = $gg->search_uin($n,1);
+	    if (@{$res}->[0]->{active} == 1) {
+			Irssi::printformat(MSGLEVEL_NOTICES,'gginfo',$nicks{$n}." $n zalogowany");
+		} else {
+			Irssi::printformat(MSGLEVEL_NOTICES,'gginfo',$nicks{$n}." $n nie zalogowany");
+		}
+	}
+}
+
+Irssi::command_bind('active','cmd_active','gg');
+sub cmd_active {
+	foreach my $n (keys %nicks) {
+	    my $res = $gg->search_uin($n,1);
+	    if (@{$res}->[0]->{active} == 1) {
+		Irssi::printformat(MSGLEVEL_NOTICES,'gginfo',$nicks{$n}." $n zalogowany");
+		}
+	}   
+}
 
 Irssi::command_bind('ggmsg','cmd_ggmsg','gg');
 sub cmd_ggmsg {
