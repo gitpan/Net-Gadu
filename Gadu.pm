@@ -17,7 +17,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.11';
+our $VERSION = '1.0';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -132,15 +132,13 @@ Net::Gadu - Interfejs do biblioteki libgadu.so (czesc ekg)
 
 =head1 DESCRIPTION
 
-Bardzo wstepna i testowa wersja modulu, ale chyba dziala.
-
 Wykorzystuje biblioteke libgadu.so ktora jest czescia projektu Ekg ( http://dev.null.pl/ekg/ )
 Aby ja otrzymac nalezy skompilowac ekg z opcja --with-shared. Jesli uzywasz ekg z pakietu prawdopodobnie
 biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.11.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-1.0.tar.gz
 
 =head1 METHODS
 
@@ -294,9 +292,13 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 Marcin Krzyzanowski krzak@linux.net.pl
 GG: 42112
 
+=head1 LICENCE
+LGPL
+
 =head1 SEE ALSO
 
     http://dev.null.pl/ekg/
     http://www.gadu-gadu.pl/
+    http://www.gnugadu.org
 
 =cut
