@@ -1,11 +1,10 @@
-0.5.3 Jun  10  01:44:25 2002
-	prototypy dla gg_search (powodowalo ostrzenia)
+0.6 Jun  11
+	->search_uin()
 	->get_event zwraca juz hasza zamiast hasza w tablicy (zonk!)
-		
-
-0.5.2 Jun  6  22:52:01 2002
-	remove idiot debug message
+	prototypy dla gg_search (powodowalo ostrzenia)
+	zapomialem wyciac jedno printf sluzace do debugu, juz wycialem
 	"famale" -> "female"
+	update dokumentacji
 	
 0.5  Jun  6  12:45:57 2002
 	documentation update

@@ -16,7 +16,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.5.3';
+our $VERSION = '0.6';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -48,6 +48,11 @@ sub search {
     my ($cl,$nickname,$first_name,$last_name,$city,$gender,$active) = @_;
     my %gd = ("male" => 2, "female" => 1, "none" => 0);
     return Net::Gadu::gg_search($nickname,$first_name,$last_name,$city,$gd{$gender},$active);
+}
+
+sub search_uin {
+    my ($cl,$uin,$active) = @_;
+    return Net::Gadu::gg_search_uin($uin,$active);
 }
 
 sub login {
@@ -134,7 +139,7 @@ biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.5.3.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.6.tar.gz
 
 =head1 METHODS
 
@@ -171,6 +176,11 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
     $gender = "male" lub "female" lub "none")
     $active = 1 lub 0
+
+=item $gg->search_uin($uin,$active)
+    
+    szuka uzytkownika o podanym UIN 
+    (active oznacza czy ma szukac posrod aktywnych czy nie)
 
 =item $gg->check_event()
 
@@ -228,7 +238,7 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     # SEARCH
     my $res = $gg->search("","Ania","","","female",0);
     foreach my $a (@{$res}) {
-        print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
+        print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}." ".$a->{active}."\n";
     }
 
     #print ($res->[1]->{uin});

@@ -138,6 +138,45 @@ gg_search(nickname,first_name,last_name,city,gender,active)
 	RETVAL = newRV((SV *)results);
     OUTPUT:
 	RETVAL
+
+SV *
+gg_search_uin(uin,active)
+    int		uin
+    int		active
+    PROTOTYPE: $$
+    INIT:
+	AV	* results;
+	struct gg_search_request *r;
+	struct gg_http	*hr;
+	struct gg_search *s;
+	int i;
+	results = (AV *)sv_2mortal((SV *)newAV());
+    CODE:
+	r = gg_search_request_mode_3(uin,active,0);
+	hr = gg_search(r,0);
+	s  = hr->data;
+
+	for (i=0;i<s->count;i++) {
+		HV *rh;
+		
+		rh=(HV *)sv_2mortal((SV *)newHV());
+		
+		hv_store(rh,"uin",3,newSVnv(s->results[i].uin),0);
+		hv_store(rh,"first_name",10,newSVpv(s->results[i].first_name,0),0);
+		hv_store(rh,"last_name",9,newSVpv(s->results[i].last_name,0),0);
+		hv_store(rh,"nickname",8,newSVpv(s->results[i].nickname,0),0);
+		hv_store(rh,"born",4,newSVnv(s->results[i].born),0);
+		hv_store(rh,"gender",6,newSVnv(s->results[i].gender),0);
+		hv_store(rh,"city",4,newSVpv(s->results[i].city,0),0);
+		hv_store(rh,"active",6,newSVnv(s->results[i].active),0);
+		
+		av_push(results, newRV((SV *)rh));
+		
+		}
+	gg_free_search(hr);		
+	RETVAL = newRV((SV *)results);
+    OUTPUT:
+	RETVAL
 		
 		
 
