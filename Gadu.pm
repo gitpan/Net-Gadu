@@ -16,7 +16,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.5.2';
+our $VERSION = '0.5.3';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -134,7 +134,7 @@ biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.5.2.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.5.3.tar.gz
 
 =head1 METHODS
 
@@ -178,25 +178,25 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     
 =item $gg->get_event()
 
-    Zwraca dane ze zdarzenia ktore zaszlo, zwracana jest tablica haszy np :
+    Zwraca dane ze zdarzenia ktore zaszlo, zwracany jest hasz np :
 	$e = $gg_event();
 	
-    $e->[0]->{type} zawiera kod ostatniego zdarzenia
+    $e->{type} zawiera kod ostatniego zdarzenia
     
 	$Net::Gadu::EVENT_MSG
-	        $e->[0]->{message}  # tresc wiadomosci
-		$e->[0]->{sender}   # uin wysylajacego
-		$e->[0]->{msgclass}    # typ wiadomosci
+	        $e->{message}  # tresc wiadomosci
+		$e->{sender}   # uin wysylajacego
+		$e->{msgclass}    # typ wiadomosci
 
 	$Net::Gadu::EVENT_ACK	    # potwierdzenie wyslania wiadomosci
-	        $e->[0]->{recipient}
-		$e->[0]->{status}
-		$e->[0]->{seq}
+	        $e->{recipient}
+		$e->{status}
+		$e->{seq}
 
 	$Net::Gadu::EVENT_STATUS    # zmiana statusu
-	        $e->[0]->{uin}
-		$e->[0]->{status}
-		$e->[0]->{descr}
+	        $e->{uin}
+		$e->{status}
+		$e->{descr}
 
     Dostepne kody zdarzen :
     
@@ -243,7 +243,7 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
 	my $e = $gg->get_event();
 
-	my $type = $e->[0]->{type};
+	my $type = $e->{type};
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
@@ -251,7 +251,7 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {
-	    print $e->[0]->{message}." ".$e->[0]->{sender}."\n";
+	    print $e->{message}." ".$e->{sender}."\n";
 	}
 	
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use ExtUtils::testlib;
+#use ExtUtils::testlib;
 use Net::Gadu;
 
 my $gg = new Net::Gadu(async=>1);
@@ -24,7 +24,7 @@ while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
-	my $type = $e->[0]->{type};
+	my $type = $e->{type};
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
@@ -32,7 +32,7 @@ while ($gg->check_event() == 1) {
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {
-	    print $e->[0]->{message}." ".$e->[0]->{sender}."\n";
+	    print $e->{message}." ".$e->{sender}."\n";
 	}
 	
 

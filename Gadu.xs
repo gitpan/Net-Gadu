@@ -62,36 +62,33 @@ gg_get_event(sess)
     PROTOTYPE: $
     PREINIT:
 	struct gg_event *event;
-	AV	* results;
+	HV	* results;
     INIT:
-	results = (AV *)sv_2mortal((SV *)newAV());
+	results = (HV *)sv_2mortal((SV *)newHV());
     CODE:
 
 	if ((sess != NULL) && 
 	    (sess->status != GG_STATUS_NOT_AVAIL) &&
 	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR) && 
 	    (event = gg_watch_fd(sess))) {
-	    HV	*rh;
-	    rh=(HV *)sv_2mortal((SV *)newHV());
-    	    hv_store(rh,"type",4,newSVnv(event->type),0);
+    	    hv_store(results,"type",4,newSVnv(event->type),0);
 	    switch (event->type) {
 		case GG_EVENT_MSG:
-		    hv_store(rh,"msgclass",8,newSVnv(event->event.msg.msgclass),0);
-		    hv_store(rh,"sender",6,newSVnv(event->event.msg.sender),0);
-		    hv_store(rh,"message",7,newSVpv(event->event.msg.message,0),0);
+		    hv_store(results,"msgclass",8,newSVnv(event->event.msg.msgclass),0);
+		    hv_store(results,"sender",6,newSVnv(event->event.msg.sender),0);
+		    hv_store(results,"message",7,newSVpv(event->event.msg.message,0),0);
 		    break;
 		case GG_EVENT_ACK:
-		    hv_store(rh,"recipient",9,newSVnv(event->event.ack.recipient),0);
-		    hv_store(rh,"status",6,newSVnv(event->event.ack.status),0);
-		    hv_store(rh,"seq",3,newSVnv(event->event.ack.seq),0);
+		    hv_store(results,"recipient",9,newSVnv(event->event.ack.recipient),0);
+		    hv_store(results,"status",6,newSVnv(event->event.ack.status),0);
+		    hv_store(results,"seq",3,newSVnv(event->event.ack.seq),0);
 		    break;
 		case GG_EVENT_STATUS:
-		    hv_store(rh,"uin",3,newSVnv(event->event.status.uin),0);
-		    hv_store(rh,"status",6,newSVnv(event->event.status.status),0);
-		    hv_store(rh,"descr",5,newSVpv(event->event.status.descr,0),0);
+		    hv_store(results,"uin",3,newSVnv(event->event.status.uin),0);
+		    hv_store(results,"status",6,newSVnv(event->event.status.status),0);
+		    hv_store(results,"descr",5,newSVpv(event->event.status.descr,0),0);
 		    break;
 	    }
-	    av_push(results, newRV((SV *)rh));
 	    gg_free_event(event);
 	    }
 	    RETVAL = newRV((SV *)results);
@@ -107,7 +104,7 @@ gg_search(nickname,first_name,last_name,city,gender,active)
     char	*city
     int		gender
     int		active
-    PROTOTYPE: $$$$$
+    PROTOTYPE: $$$$$$
     INIT:
 	AV	* results;
 	struct gg_search_request *r;
