@@ -16,7 +16,17 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.04';
+our $VERSION = '0.5';
+our $EVENT_NONE = 0;
+our $EVENT_MSG = 1;
+our $EVENT_NOTIFY = 2;
+our $EVENT_NOTIFY_DESCR = 3;
+our $EVENT_STATUS = 4;
+our $EVENT_ACK = 5;
+our $EVENT_PONG = 6; 
+our $EVENT_CONN_FAILED = 7;
+our $EVENT_CONN_SUCCESS = 8;
+our $EVENT_DISCONNECT = 9;
 
 bootstrap Net::Gadu $VERSION;
 
@@ -24,20 +34,42 @@ bootstrap Net::Gadu $VERSION;
 sub new {
     my ($c, %args) = @_;
     my $class = ref($c) || $c;
+    if (!exists($args{server})) { $args{server} = "217.17.41.84"; }
+    if (!exists($args{async})) { $args{async} = 0; }
     bless \%args, $class;
+}
+
+sub set_server {
+    my ($cl,$server) = @_;
+    $cl->{server} = $server;
 }
 
 sub search {
     my ($cl,$nickname,$first_name,$last_name,$city,$gender,$active) = @_;
     my %gd = ("male" => 2, "famale" => 1, "none" => 0);
-    return Net::Gadu::gg_search($nickname,$first_name,$last_name,$city,$gd{$gender});
+    return Net::Gadu::gg_search($nickname,$first_name,$last_name,$city,$gd{$gender},$active);
 }
 
 sub login {
     my ($cl,$uin,$password) = @_;
     $cl->{uin}=$uin;
     $cl->{password}=$password;
-    $cl->{session} = Net::Gadu::gg_login($cl->{uin},$cl->{password},0);
+    $cl->{session} = Net::Gadu::gg_login($cl->{uin},$cl->{password},$cl->{async},$cl->{server});
+}
+
+sub get_event {
+    my $cl = shift;
+    return Net::Gadu::gg_get_event($cl->{session});
+}
+
+sub check_event {
+    my $cl = shift;
+    return Net::Gadu::gg_check_event($cl->{session});
+}
+
+sub ping {
+    my $cl = shift;
+    return Net::Gadu::gg_ping($cl->{session});
 }
 
 sub logoff {
@@ -49,6 +81,11 @@ sub logoff {
 sub send_message {
     my ($cl,$receiver,$message) = @_;
     return Net::Gadu::gg_send_message($cl->{session},0x0004,$receiver,$message);
+}
+
+sub send_message_chat {
+    my ($cl,$receiver,$message) = @_;
+    return Net::Gadu::gg_send_message($cl->{session},0x0008,$receiver,$message);
 }
 
 sub change_status {
@@ -85,21 +122,30 @@ __END__
 
 =head1 NAME
 
-Net::Gadu - Interfes do biblioteki libgadu.so (part of ekg)
+Net::Gadu - Interfejs do biblioteki libgadu.so (czesc ekg)
 
 =head1 DESCRIPTION
 
 Bardzo wstepna i testowa wersja modulu, ale chyba dziala.
 
+Wykozystuje biblioteke libgadu.so ktora jest czescia projektu Ekg ( http://dev.null.pl/ekg/ )
+Aby ja otrzymac nalezy skompilowac ekg z opcja --with-shared. Jesli uzywasz ekg z pakietu prawdopodobnie
+biblioteka ta jest automatycznie instalowana w systemie.
+
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.4.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.5.tar.gz
 
 =head1 METHODS
 
 Dostepne metody :
 
 =over 4
+
+=item $gg = new Net::Gadu(server => "server_ip")
+
+    opcjonalny parametr : server   (ip alternatywnego serwera)
+			  async = 1 lub 0   (komunikacja asynchroniczna)
 
 =item $gg->login(uin, password);
 
@@ -113,14 +159,58 @@ Zakonczenie sesji.
 
 Wysyla wiadomosc pod podany UIN.
 
+=item $gg->send_message_chat(receiver_uin, message);
+
+Wysyla wiadomosc pod podany UIN.
+
 =item $gg->set_available();
 
 Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_not_available().
 
 =item $gg->search($nickname,$first_name,$last_name,$city,$gender,$active)
 
-    $gender = ("male","famale","none")
-    $active = (1,0)
+    $gender = "male" lub "famale" lub "none")
+    $active = 1 lub 0
+
+=item $gg->check_event()
+
+    Sprawdza czy zaszlo jakies zdarzenie (przydatne przy polaczeniu asynchronicznym zwlaszcza)
+    
+=item $gg->get_event()
+
+    Zwraca dane ze zdarzenia ktore zaszlo, zwracana jest tablica haszy np :
+	$e = $gg_event();
+	
+    $e->[0]->{type} zawiera kod ostatniego zdarzenia
+    
+	$Net::Gadu::EVENT_MSG
+	        $e->[0]->{message}  # tresc wiadomosci
+		$e->[0]->{sender}   # uin wysylajacego
+		$e->[0]->{msgclass}    # typ wiadomosci
+
+	$Net::Gadu::EVENT_ACK	    # potwierdzenie wyslania wiadomosci
+	        $e->[0]->{recipient}
+		$e->[0]->{status}
+		$e->[0]->{seq}
+
+	$Net::Gadu::EVENT_STATUS    # zmiana statusu
+	        $e->[0]->{uin}
+		$e->[0]->{status}
+		$e->[0]->{descr}
+
+    Dostepne kody zdarzen :
+    
+    $Net::Gadu::EVENT_NONE = 0
+    $Net::Gadu::EVENT_MSG = 1
+    $Net::Gadu::EVENT_NOTIFY = 2
+    $Net::Gadu::EVENT_NOTIFY_DESCR = 3
+    $Net::Gadu::EVENT_STATUS = 4
+    $Net::Gadu::EVENT_ACK = 5
+    $Net::Gadu::EVENT_PONG = 6
+    $Net::Gadu::EVENT_CONN_FAILED = 7
+    $Net::Gadu::EVENT_CONN_SUCCESS = 8
+    $Net::Gadu::EVENT_DISCONNECT = 9
+
 
 =back
 
@@ -128,25 +218,48 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
 =over 4
 
+    #!/usr/bin/perl
+
+    use ExtUtils::testlib;
     use Net::Gadu;
 
-    my $gg = new Net::Gadu;
+    my $gg = new Net::Gadu(async=>1);
 
-    my $res = $gg->search("","Ania","","","famale",1);
-    
+    # SEARCH
+    my $res = $gg->search("","Ania","","","famale",0);
     foreach my $a (@{$res}) {
-    
-	print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
-    
+        print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
     }
 
-    $gg->login("111111","secretpassword");
+    #print ($res->[1]->{uin});
+    #print ($res->[1]->{first_name});
+    #print ($res->[1]->{last_name});
 
-    $gg->send_message("332323","this is a test");
+    ## LOGIN
+    $gg->login("12121212","password") or die "Login error\n";
 
-    $gg->set_available();
-    
-    $gg->logoff();
+    ## EVENTS(this example, after successful login change status, send message and logout
+    while ($gg->check_event() == 1) {
+
+	my $e = $gg->get_event();
+
+	my $type = $e->[0]->{type};
+	
+	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
+	    $gg->set_available();
+	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :))");
+	}
+
+	if ($type == $Net::Gadu::EVENT_MSG) {
+	    print $e->[0]->{message}." ".$e->[0]->{sender}."\n";
+	}
+	
+
+	if ($type == $Net::Gadu::EVENT_ACK) {
+	    $gg->logoff();
+	}
+	
+    }
 
 =back
 

@@ -3,14 +3,13 @@
 use ExtUtils::testlib;
 use Net::Gadu;
 
-my $gg = new Net::Gadu;
+my $gg = new Net::Gadu(async=>1);
 
 ## SEARCH
-my $res = $gg->search("","Ania","","","famale",1);
+my $res = $gg->search("","Ania","","","famale",0);
 foreach my $a (@{$res}) {
     print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
 }
-
 
 #print ($res->[1]->{uin});
 #print ($res->[1]->{first_name});
@@ -18,12 +17,28 @@ foreach my $a (@{$res}) {
 
 
 ## LOGIN
-$gg->login("11111","dupa.8");
+$gg->login("1112222","password") or die "Login error\n";
 
-## SEND MESSAGE
-$gg->send_message("1222222","perl test Net::Gadu");
-$gg->set_available();
-sleep(5);
+## EVENTS(this example, after successful login change status, send message and logout
+while ($gg->check_event() == 1) {
+
+	my $e = $gg->get_event();
+
+	my $type = $e->[0]->{type};
+	
+	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
+	    $gg->set_available();
+	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :))");
+	}
+
+	if ($type == $Net::Gadu::EVENT_MSG) {
+	    print $e->[0]->{message}." ".$e->[0]->{sender}."\n";
+	}
+	
+
+	if ($type == $Net::Gadu::EVENT_ACK) {
+	    $gg->logoff();
+	}
+}
 
 ## LOGOFF
-$gg->logoff();

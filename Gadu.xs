@@ -3,6 +3,7 @@
 #include "XSUB.h"
 #include <libgadu.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 
 
 typedef struct gg_session *Sgg_session;
@@ -10,15 +11,104 @@ typedef struct gg_http	*Sgg_http;
 
 MODULE = Net::Gadu		PACKAGE = Net::Gadu
 
+int
+gg_ping(sess)
+    Sgg_session	sess
+
+
+int
+gg_check_event(sess)
+	Sgg_session	sess;
+    PREINIT:
+	int	ret = 0;
+    CODE:
+	
+	printf("%d\n",sess->status);
+
+	if ((sess != NULL) && 
+	    (sess->status != GG_STATUS_NOT_AVAIL) && 
+	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR)) {
+	    fd_set rd, wr, ex;
+	    FD_ZERO(&rd);
+	    FD_ZERO(&wr);
+	    FD_ZERO(&ex);
+
+    	    if ((sess->check & GG_CHECK_READ))
+			FD_SET(sess->fd, &rd);
+
+	    if ((sess->check & GG_CHECK_WRITE))
+			FD_SET(sess->fd, &wr);
+
+	    FD_SET(sess->fd, &ex);
+
+	    if (select(sess->fd + 1, &rd, &wr, &ex, NULL) == -1)
+			ret = 0;
+
+	    if (FD_ISSET(sess->fd, &ex))
+			ret = 0;
+
+
+	    if (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr))
+		    ret = 1;
+	} else 
+	    ret = 0;
+
+	RETVAL = ret;
+    OUTPUT:
+	RETVAL
 
 
 SV *
-gg_search(nickname,first_name,last_name,city,gender);
+gg_get_event(sess)
+	Sgg_session	sess;
+    PROTOTYPE: $
+    PREINIT:
+	struct gg_event *event;
+	AV	* results;
+    INIT:
+	results = (AV *)sv_2mortal((SV *)newAV());
+    CODE:
+
+	if ((sess != NULL) && 
+	    (sess->status != GG_STATUS_NOT_AVAIL) &&
+	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR) && 
+	    (event = gg_watch_fd(sess))) {
+	    HV	*rh;
+	    rh=(HV *)sv_2mortal((SV *)newHV());
+    	    hv_store(rh,"type",4,newSVnv(event->type),0);
+	    switch (event->type) {
+		case GG_EVENT_MSG:
+		    hv_store(rh,"msgclass",8,newSVnv(event->event.msg.msgclass),0);
+		    hv_store(rh,"sender",6,newSVnv(event->event.msg.sender),0);
+		    hv_store(rh,"message",7,newSVpv(event->event.msg.message,0),0);
+		    break;
+		case GG_EVENT_ACK:
+		    hv_store(rh,"recipient",9,newSVnv(event->event.ack.recipient),0);
+		    hv_store(rh,"status",6,newSVnv(event->event.ack.status),0);
+		    hv_store(rh,"seq",3,newSVnv(event->event.ack.seq),0);
+		    break;
+		case GG_EVENT_STATUS:
+		    hv_store(rh,"uin",3,newSVnv(event->event.status.uin),0);
+		    hv_store(rh,"status",6,newSVnv(event->event.status.status),0);
+		    hv_store(rh,"descr",5,newSVpv(event->event.status.descr,0),0);
+		    break;
+	    }
+	    av_push(results, newRV((SV *)rh));
+	    gg_free_event(event);
+	    }
+	    RETVAL = newRV((SV *)results);
+    OUTPUT:
+	RETVAL
+    
+
+SV *
+gg_search(nickname,first_name,last_name,city,gender,active)
     char	*nickname
     char	*first_name
     char	*last_name
     char	*city
     int		gender
+    int		active
     PROTOTYPE: $$$$$
     INIT:
 	AV	* results;
@@ -28,7 +118,7 @@ gg_search(nickname,first_name,last_name,city,gender);
 	int i;
 	results = (AV *)sv_2mortal((SV *)newAV());
     CODE:
-	r = gg_search_request_mode_0(nickname, first_name, last_name, city, gender, 0, 0, 0, 0);
+	r = gg_search_request_mode_0(nickname, first_name, last_name, city, gender, 0, 0, active, 0);
 	hr = gg_search(r,0);
 	s  = hr->data;
 
@@ -66,11 +156,12 @@ gg_send_message(sess,msgclass,recipient,message)
 
 
 Sgg_session 
-gg_login(uin,password,async)
+gg_login(uin,password,async,server_addr)
     uin_t	uin
     char 	*password
     int 	async
-    PROTOTYPE: $$$
+    char	*server_addr
+    PROTOTYPE: $$$$$
     INIT:
 	struct gg_login_params p;
     CODE:
@@ -79,6 +170,7 @@ gg_login(uin,password,async)
 	p.password = password;
 	p.async = async;
 	p.status = 0x0002;
+	p.server_addr = inet_addr(server_addr);
 	RETVAL = gg_login(&p);
 	ST(0) = sv_newmortal();
 	sv_setref_pv(ST(0), "Sgg_session", (void*)RETVAL);

@@ -1,12 +1,18 @@
-0.04  Sun Jun  2 18:23:47 2002
+0.5  Jun  6  12:45:57 2002
+	documentation update
+	->search(..,$active) added;
+	new() parameters (async,server)
+	Events
+	
+0.4  Jun  2 18:23:47 2002
 	Net::Gadu
 	$gg->search(..);
 
-0.02  Sun Jun  2 11:33:17 2002
+0.2  Jun  2 11:33:17 2002
 	$gg->logout();
 	changing status
 	documentation update
 	
-0.01  Thu May 30 23:22:38 2002
+0.1  May 30 23:22:38 2002
 	first initial test version
 
