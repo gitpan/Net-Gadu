@@ -16,7 +16,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.5.1';
+our $VERSION = '0.5.2';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -128,13 +128,13 @@ Net::Gadu - Interfejs do biblioteki libgadu.so (czesc ekg)
 
 Bardzo wstepna i testowa wersja modulu, ale chyba dziala.
 
-Wykozystuje biblioteke libgadu.so ktora jest czescia projektu Ekg ( http://dev.null.pl/ekg/ )
+Wykorzystuje biblioteke libgadu.so ktora jest czescia projektu Ekg ( http://dev.null.pl/ekg/ )
 Aby ja otrzymac nalezy skompilowac ekg z opcja --with-shared. Jesli uzywasz ekg z pakietu prawdopodobnie
 biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.5.1.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.5.2.tar.gz
 
 =head1 METHODS
 

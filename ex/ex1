@@ -17,7 +17,7 @@ foreach my $a (@{$res}) {
 
 
 ## LOGIN
-$gg->login("1112222","password") or die "Login error\n";
+$gg->login("111111","password") or die "Login error\n";
 
 ## EVENTS(this example, after successful login change status, send message and logout
 while ($gg->check_event() == 1) {
@@ -28,7 +28,7 @@ while ($gg->check_event() == 1) {
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
-	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :))");
+	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :) ");
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {

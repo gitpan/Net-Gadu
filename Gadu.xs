@@ -23,8 +23,6 @@ gg_check_event(sess)
 	int	ret = 0;
     CODE:
 	
-	printf("%d\n",sess->status);
-
 	if ((sess != NULL) && 
 	    (sess->status != GG_STATUS_NOT_AVAIL) && 
 	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR)) {
