@@ -6,7 +6,7 @@ use Net::Gadu;
 my $gg = new Net::Gadu(async=>1);
 
 ## SEARCH
-my $res = $gg->search("","Ania","","","famale",0);
+my $res = $gg->search("","Ania","","","female",0);
 foreach my $a (@{$res}) {
     print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
 }

@@ -1,3 +1,6 @@
+0.5.1 Jun  6  18:55:01 2002
+	"famale" -> "female"
+	
 0.5  Jun  6  12:45:57 2002
 	documentation update
 	->search(..,$active) added;
