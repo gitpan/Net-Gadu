@@ -115,9 +115,11 @@ gg_search(nickname,first_name,last_name,city,gender,active)
     CODE:
 	r = gg_search_request_mode_0(nickname, first_name, last_name, city, gender, 0, 0, active, 0);
 	hr = gg_search(r,0);
-	s  = hr->data;
 
-	for (i=0;i<s->count;i++) {
+	if (hr != NULL) {
+	    s  = hr->data;
+
+	    for (i=0;i<s->count;i++) {
 		HV *rh;
 		
 		rh=(HV *)sv_2mortal((SV *)newHV());
@@ -134,7 +136,9 @@ gg_search(nickname,first_name,last_name,city,gender,active)
 		av_push(results, newRV((SV *)rh));
 		
 		}
-	gg_free_search(hr);		
+	    gg_free_search(hr);
+	}
+
 	RETVAL = newRV((SV *)results);
     OUTPUT:
 	RETVAL
@@ -154,9 +158,10 @@ gg_search_uin(uin,active)
     CODE:
 	r = gg_search_request_mode_3(uin,active,0);
 	hr = gg_search(r,0);
-	s  = hr->data;
+	if (hr != NULL) {
+	    s  = hr->data;
 
-	for (i=0;i<s->count;i++) {
+	    for (i=0;i<s->count;i++) {
 		HV *rh;
 		
 		rh=(HV *)sv_2mortal((SV *)newHV());
@@ -173,7 +178,8 @@ gg_search_uin(uin,active)
 		av_push(results, newRV((SV *)rh));
 		
 		}
-	gg_free_search(hr);		
+	    gg_free_search(hr);
+	};
 	RETVAL = newRV((SV *)results);
     OUTPUT:
 	RETVAL

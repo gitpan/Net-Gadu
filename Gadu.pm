@@ -1,9 +1,9 @@
 package Net::Gadu;
 
 use 5.006;
-use strict;
 use warnings;
 use Socket;
+use strict;
 
 require Exporter;
 require DynaLoader;
@@ -17,7 +17,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -140,7 +140,7 @@ biblioteka ta jest automatycznie instalowana w systemie.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.7.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.8.tar.gz
 
 =head1 METHODS
 
@@ -150,43 +150,53 @@ Dostepne metody :
 
 =item $gg = new Net::Gadu(server => "server_ip")
 
-    opcjonalny parametr : server => "11.11.11.11"  (ip alternatywnego serwera)
-			  async => 1 lub 0   (komunikacja asynchroniczna)
+    opcjonalny parametr :
+    server => "11.11.11.11"  (ip alternatywnego serwera)
+    async => 1 lub 0   (komunikacja asynchroniczna)
+
 
 =item $gg->login(uin, password);
 
 Polaczenie z serwerem i zalogowanie.
 
+
 =item $gg->logoff();
 
 Zakonczenie sesji.
+
 
 =item $gg->send_message(receiver_uin, message);
 
 Wysyla wiadomosc pod podany UIN.
 
+
 =item $gg->send_message_chat(receiver_uin, message);
 
 Wysyla wiadomosc pod podany UIN.
 
+
 =item $gg->set_available();
 
 Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_not_available().
+
 
 =item $gg->search($nickname,$first_name,$last_name,$city,$gender,$active)
 
     $gender = "male" lub "female" lub "none")
     $active = 1 lub 0
 
+
 =item $gg->search_uin($uin,$active)
     
     szuka uzytkownika o podanym UIN 
     (active oznacza czy ma szukac posrod aktywnych czy nie)
 
+
 =item $gg->check_event()
 
     Sprawdza czy zaszlo jakies zdarzenie (przydatne przy polaczeniu asynchronicznym zwlaszcza)
     
+
 =item $gg->get_event()
 
     Zwraca dane ze zdarzenia ktore zaszlo, zwracany jest hasz np :

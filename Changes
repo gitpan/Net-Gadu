@@ -1,3 +1,7 @@
+0.8 Jun  16
+	glownie duze zmiany w contrib/irssi_gg.pl
+	poprawka coredumpa przy probie szukania gdy katalog nie jest dostepny
+
 0.7 Jun  12
 	->check_event poprawione, teraz powinno byc juz w miare dobrze
 	contrib/irssi_gg.pl modul dla irssi
