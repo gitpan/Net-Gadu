@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+use Net::Gadu;
+
+my $gg = new Net::Gadu;
+$gg->login("11111","haslo");
+$gg->send_message("212121","wiadomosc z perla");
+$gg->set_available();
+sleep(5);
+$gg->logoff();
