@@ -1,10 +1,29 @@
 #!/usr/bin/perl
 
+use ExtUtils::testlib;
 use Net::Gadu;
 
 my $gg = new Net::Gadu;
-$gg->login("11111","haslo");
-$gg->send_message("212121","wiadomosc z perla");
+
+## SEARCH
+my $res = $gg->search("","Ania","","","famale",1);
+foreach my $a (@{$res}) {
+    print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
+}
+
+
+#print ($res->[1]->{uin});
+#print ($res->[1]->{first_name});
+#print ($res->[1]->{last_name});
+
+
+## LOGIN
+$gg->login("11111","dupa.8");
+
+## SEND MESSAGE
+$gg->send_message("1222222","perl test Net::Gadu");
 $gg->set_available();
 sleep(5);
+
+## LOGOFF
 $gg->logoff();

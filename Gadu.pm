@@ -16,7 +16,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 bootstrap Net::Gadu $VERSION;
 
@@ -25,6 +25,12 @@ sub new {
     my ($c, %args) = @_;
     my $class = ref($c) || $c;
     bless \%args, $class;
+}
+
+sub search {
+    my ($cl,$nickname,$first_name,$last_name,$city,$gender,$active) = @_;
+    my %gd = ("male" => 2, "famale" => 1, "none" => 0);
+    return Net::Gadu::gg_search($nickname,$first_name,$last_name,$city,$gd{$gender});
 }
 
 sub login {
@@ -43,7 +49,6 @@ sub logoff {
 sub send_message {
     my ($cl,$receiver,$message) = @_;
     return Net::Gadu::gg_send_message($cl->{session},0x0004,$receiver,$message);
-#    Net::Gadu::gg_free_session($s);
 }
 
 sub change_status {
@@ -88,7 +93,7 @@ Bardzo wstepna i testowa wersja modulu, ale chyba dziala.
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-0.3.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-0.4.tar.gz
 
 =head1 METHODS
 
@@ -112,6 +117,11 @@ Wysyla wiadomosc pod podany UIN.
 
 Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_not_available().
 
+=item $gg->search($nickname,$first_name,$last_name,$city,$gender,$active)
+
+    $gender = ("male","famale","none")
+    $active = (1,0)
+
 =back
 
 =head1 EXAMPLES
@@ -121,6 +131,14 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     use Net::Gadu;
 
     my $gg = new Net::Gadu;
+
+    my $res = $gg->search("","Ania","","","famale",1);
+    
+    foreach my $a (@{$res}) {
+    
+	print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}."\n";
+    
+    }
 
     $gg->login("111111","secretpassword");
 
@@ -135,9 +153,11 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 =head1 AUTHOR
 
 Marcin Krzyzanowski krzak@linux.net.pl
+GG: 42112
 
 =head1 SEE ALSO
 
-http://dev.null.pl/ekg
+    http://dev.null.pl/ekg/
+    http://www.gadu-gadu.pl/
 
 =cut

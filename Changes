@@ -1,5 +1,6 @@
-0.03  Sun Jun  2 18:23:47 2002
+0.04  Sun Jun  2 18:23:47 2002
 	Net::Gadu
+	$gg->search(..);
 
 0.02  Sun Jun  2 11:33:17 2002
 	$gg->logout();
