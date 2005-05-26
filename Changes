@@ -1,41 +1,48 @@
-1.0 Mar 1 - 2005
-        poprawka segfaultu przy obsludze zdarzen
+1.5 May 26 2006
+	* wyszukiwanie dzia³a,
+	* zmiana API wyszukiwania
+	* po³±czenie asynchroniczne jest preferowane
+	* zmiany w okolicach zmiany statusów, powinno byæ wygodniej
+	* aktualizacja dokumentacji i przyk³adów
+
+1.0 Mar 1 2005
+        * poprawka segfaultu przy obsludze zdarzen
  
 0.9 Aug  15
-	dodatki w contrib/irssi_gg.pl (Dawid)
+	* dodatki w contrib/irssi_gg.pl (Dawid)
 
 0.8 Jun  16
-	glownie duze zmiany w contrib/irssi_gg.pl
-	poprawka coredumpa przy probie szukania gdy katalog nie jest dostepny
+	* glownie duze zmiany w contrib/irssi_gg.pl
+	* poprawka coredumpa przy probie szukania gdy katalog nie jest dostepny
 
 0.7 Jun  12
-	->check_event poprawione, teraz powinno byc juz w miare dobrze
-	contrib/irssi_gg.pl modul dla irssi
-	update dokumentacji
+	* ->check_event poprawione, teraz powinno byc juz w miare dobrze
+	* contrib/irssi_gg.pl modul dla irssi
+	* update dokumentacji
 
 0.6 Jun  11
-	->search_uin()
-	->get_event zwraca juz hasza zamiast hasza w tablicy (zonk!)
-	prototypy dla gg_search (powodowalo ostrzenia)
-	zapomialem wyciac jedno printf sluzace do debugu, juz wycialem
-	"famale" -> "female"
-	update dokumentacji
+	* ->search_uin()
+	* ->get_event zwraca juz hasza zamiast hasza w tablicy (zonk!)
+	* prototypy dla gg_search (powodowalo ostrzenia)
+	* zapomialem wyciac jedno printf sluzace do debugu, juz wycialem
+	* "famale" -> "female"
+	* update dokumentacji
 	
 0.5  Jun  6
-	documentation update
-	->search(..,$active) added;
-	new() parameters (async,server)
-	Events
+	* documentation update
+	* ->search(..,$active) added;
+	* new() parameters (async,server)
+	* Events
 	
 0.4  Jun  2
-	Net::Gadu
-	$gg->search(..);
+	* Net::Gadu
+	* $gg->search(..);
 
 0.2  Jun  2
-	$gg->logout();
-	changing status
-	documentation update
+	* $gg->logout();
+	* changing status
+	* documentation update
 	
 0.1  May 30 23:22:38 2002
-	first initial test version
+	* first initial test version
 

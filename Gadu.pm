@@ -1,3 +1,23 @@
+#
+# Net::Gadu 
+# 
+# Copyright (C) 2002-2005 Marcin Krzy¿anowski
+# http://krzak.linux.net.pl
+# 
+# This program is free software; you can redistribute it and/or modify 
+# it under the terms of the GNU Lesser General Public License as published by 
+# the Free Software Foundation; either version 2 of the License, or 
+# (at your option) any later version. 
+# 
+# This program is distributed in the hope that it will be useful, 
+# but WITHOUT ANY WARRANTY; without even the implied warranty of 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+# GNU General Public License for more details. 
+# 
+# You should have received a copy of the GNU Lesser General Public License 
+# along with this program; if not, write to the Free Software 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
 package Net::Gadu;
 
 use 5.006;
@@ -17,7 +37,10 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '1.0';
+
+our $VERSION = '1.5';
+
+
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
@@ -28,6 +51,17 @@ our $EVENT_PONG = 6;
 our $EVENT_CONN_FAILED = 7;
 our $EVENT_CONN_SUCCESS = 8;
 our $EVENT_DISCONNECT = 9;
+our $EVENT_SEARCH_REPLY = 19;
+
+our $STATUS_NOT_AVAIL = 0x0001;	
+our $STATUS_NOT_AVAIL_DESCR = 0x0015;
+our $STATUS_AVAIL = 0x0002;
+our $STATUS_AVAIL_DESCR = 0x0004;
+our $STATUS_BUSY = 0x0003;
+our $STATUS_BUSY_DESCR = 0x0005;
+our $STATUS_INVISIBLE = 0x0014;
+our $STATUS_INVISIBLE_DESCR = 0x0016;
+#our $STATUS_BLOCKED = 0x0006
 
 bootstrap Net::Gadu $VERSION;
 
@@ -36,7 +70,7 @@ sub new {
     my ($c, %args) = @_;
     my $class = ref($c) || $c;
     if (!exists($args{server})) { $args{server} = "217.17.41.88"; }
-    if (!exists($args{async})) { $args{async} = 0; }
+    if (!exists($args{async})) { $args{async} = 1; }
     bless \%args, $class;
 }
 
@@ -46,14 +80,9 @@ sub set_server {
 }
 
 sub search {
-    my ($cl,$nickname,$first_name,$last_name,$city,$gender,$active) = @_;
+    my ($cl,$uin,$nickname,$first_name,$last_name,$city,$gender,$active) = @_;
     my %gd = ("male" => 2, "female" => 1, "none" => 0);
-    return Net::Gadu::gg_search($nickname,$first_name,$last_name,$city,$gd{$gender},$active);
-}
-
-sub search_uin {
-    my ($cl,$uin,$active) = @_;
-    return Net::Gadu::gg_search_uin($uin,$active);
+    return Net::Gadu::gg_search($cl->{session},$uin,$nickname,$first_name,$last_name,$city,$gd{$gender},$active);
 }
 
 sub login {
@@ -101,22 +130,22 @@ sub change_status {
 
 sub set_available {
     my ($cl,$status) = @_;
-    $cl->change_status(0x0002); # GG_STATUS_AVAIL
+    $cl->change_status($Net::Gadu::STATUS_AVAIL); # GG_STATUS_AVAIL
 }
 
 sub set_busy {
     my ($cl,$status) = @_;
-    $cl->change_status(0x0003); # GG_STATUS_BUSY
+    $cl->change_status($Net::Gadu::STATUS_BUSY); # GG_STATUS_BUSY
 }
 
 sub set_not_available {
     my ($cl,$status) = @_;
-    $cl->change_status(0x0001); # GG_STATUS_NOT_AVAIL
+    $cl->change_status($Net::Gadu::STATUS_NOT_AVAIL); # GG_STATUS_NOT_AVAIL
 }
 
 sub set_invisible {
     my ($cl,$status) = @_;
-    $cl->change_status(0x0014); # GG_STATUS_INVISIBLE
+    $cl->change_status($Net::Gadu::STATUS_INVISIBLE); # GG_STATUS_INVISIBLE
 }
 
 
@@ -128,17 +157,18 @@ __END__
 
 =head1 NAME
 
-Net::Gadu - Interfejs do biblioteki libgadu.so (czesc ekg)
+Net::Gadu - Interfejs do biblioteki libgadu.so dla protoko³u Gadu-Gadu 
 
 =head1 DESCRIPTION
 
-Wykorzystuje biblioteke libgadu.so ktora jest czescia projektu Ekg ( http://dev.null.pl/ekg/ )
-Aby ja otrzymac nalezy skompilowac ekg z opcja --with-shared. Jesli uzywasz ekg z pakietu prawdopodobnie
-biblioteka ta jest automatycznie instalowana w systemie.
+Wykorzystuje bibliotekê libgadu.so która jest czesci± projektu EKG.
+Aby zaintalowaæ libgadu.so nale¿y skompilowaæ EKG z opcj± --with-shared. Je¶li u¿ywasz EKG z pakietu prawdopodobnie
+biblioteka ta zosta³a zainstalowana. Szczegó³owe informacje znajdziesz na stronie projektu EKG - http://dev.null.pl/ekg/
+
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-1.0.tar.gz
+http://krzak.linux.net.pl/perl/Net-Gadu-1.5.tar.gz
 
 =head1 METHODS
 
@@ -146,58 +176,74 @@ Dostepne metody :
 
 =over 4
 
-=item $gg = new Net::Gadu(server => "server_ip")
+=item $gg = new Net::Gadu()
 
     opcjonalny parametr :
     server => "11.11.11.11"  (ip alternatywnego serwera)
-    async => 1 lub 0   (komunikacja asynchroniczna)
+    async => 1 lub 0   (komunikacja asynchroniczna lub nie)
 
 
 =item $gg->login(uin, password);
 
-Polaczenie z serwerem i zalogowanie.
+Po³±czenie z serwerem oraz logowanie do serwera.
 
 
 =item $gg->logoff();
 
-Zakonczenie sesji.
+Wylogowanie z serwera i zakoñczenie sesji.
 
 
 =item $gg->send_message(receiver_uin, message);
 
-Wysyla wiadomosc pod podany UIN.
+Wysy³a wiadomo¶æ pod wskazany numer UIN.
 
 
 =item $gg->send_message_chat(receiver_uin, message);
 
-Wysyla wiadomosc pod podany UIN.
+Wysy³a wiadomo¶æ pod wskazany numer UIN.
 
 
 =item $gg->set_available();
 
-Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_not_available().
+Ustawia status na dostepny. Podobne funkcje : set_busy(), set_invisible(), set_not_available(), change_status().
 
 
-=item $gg->search($nickname,$first_name,$last_name,$city,$gender,$active)
+=item $gg->change_status();
 
+Zmiana statusu mo¿liwa na jeden z:
+
+    $Net::Gadu::STATUS_NOT_AVAIL
+    $Net::Gadu::STATUS_NOT_AVAIL_DESCR
+    $Net::Gadu::STATUS_AVAIL
+    $Net::Gadu::STATUS_AVAIL_DESCR
+    $Net::Gadu::STATUS_BUSY
+    $Net::Gadu::STATUS_BUSY_DESCR
+    $Net::Gadu::STATUS_INVISIBLE
+    $Net::Gadu::STATUS_INVISIBLE_DESCR
+
+
+=item $gg->search($uin,$nickname,$first_name,$last_name,$city,$gender,$active)
+
+    Wyszukiwanie, jesli parametr ma warto¶æ "", czyli pust± wtedy to pole nie
+    jest brane pod uwagê podczas wyszukiwania.
+    Zwracana jest tablica ze szczego³owymi informacjami.
+    Odpowied¼ nale¿y odebraæ po otrzymaniu zdarzenia $Net::Gadu::EVENT_SEARCH_REPLY.
+    Przyk³adowe u¿ycie oraz wynik znajduj± siê w przyk³adowym
+    programie "ex/ex1" dostarczanym wraz ze ¼ród³ami.
+
+    Uwaga:
     $gender = "male" lub "female" lub "none")
     $active = 1 lub 0
 
 
-=item $gg->search_uin($uin,$active)
-    
-    szuka uzytkownika o podanym UIN 
-    (active oznacza czy ma szukac posrod aktywnych czy nie)
-
-
 =item $gg->check_event()
 
-    Sprawdza czy zaszlo jakies zdarzenie (przydatne przy polaczeniu asynchronicznym zwlaszcza)
+    Sprawdza czy zasz³o jakie¶ zdarzenie (szczegolnie istotne przydatne przy po³aczeniu asynchronicznym)
     
 
 =item $gg->get_event()
 
-    Zwraca dane ze zdarzenia ktore zaszlo, zwracany jest hasz np :
+    Zwraca informacje o zdarzeniu które mia³o miejsce, zwracany jest hasz np :
 	$e = $gg_event();
 	
     $e->{type} zawiera kod ostatniego zdarzenia
@@ -217,6 +263,9 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 		$e->{status}
 		$e->{descr}
 
+	$Net::Gadu::EVENT_SEARCH_REPLY
+		$e->{results}
+
     Dostepne kody zdarzen :
     
     $Net::Gadu::EVENT_NONE
@@ -229,6 +278,7 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
     $Net::Gadu::EVENT_CONN_FAILED
     $Net::Gadu::EVENT_CONN_SUCCESS 
     $Net::Gadu::EVENT_DISCONNECT
+    $Net::Gadu::EVENT_SEARCH_REPLY
 
 
 =back
@@ -239,66 +289,66 @@ Ustawia status na dostepny, podobne funkcje : set_busy(), set_invisible(), set_n
 
     #!/usr/bin/perl
 
-    use Net::Gadu;
+    use Net::Gadu; 
+    use Data::Dumper;
 
     my $gg = new Net::Gadu(async=>1);
 
-    # SEARCH
-    my $res = $gg->search("","Ania","","","female",0);
-    foreach my $a (@{$res}) {
-        print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}." ".$a->{active}."\n";
-    }
-
-    #print ($res->[1]->{uin});
-    #print ($res->[1]->{first_name});
-    #print ($res->[1]->{last_name});
-
     ## LOGIN
-    $gg->login("12121212","password") or die "Login error\n";
+    $gg->login("0123456","password") or die "Login error\n";
 
-    ## EVENTS this example, after successful login change status, send message and logout
+    ## EVENTS(this example, after successful login change status, send message and logout
     while (1) {
-      while ($gg->check_event() == 1) {
+     while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
 	my $type = $e->{type};
-
+	
 	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
 	    die "Connection failed";
 	}
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
+	    # Send THANKS to author
 	    $gg->send_message_chat("42112","dziekuje za Net::Gadu");
+	    
+	    # SEARCH INIT
+	    $gg->search("","krzak","","","","male",0);
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {
 	    print $e->{message}." ".$e->{sender}."\n";
 	}
-	
 
-	if ($type == $Net::Gadu::EVENT_ACK) {
+	if ($type == $Net::Gadu::EVENT_SEARCH_REPLY) {
+	    # SEARCH RESULT
+	    print Dumper($e->{results});
 	    $gg->logoff();
+	    exit(1);
 	}
 
-      }
+	if ($type == $Net::Gadu::EVENT_ACK) {
+	}
+     }
     }
 
 =back
 
 =head1 AUTHOR
 
-Marcin Krzyzanowski krzak@linux.net.pl
-GG: 42112
+Marcin Krzy¿anowski, http://krzak.linux.net.pl
 
 =head1 LICENCE
-LGPL
+
+Lesser General Public License
 
 =head1 SEE ALSO
 
     http://dev.null.pl/ekg/
-    http://www.gadu-gadu.pl/
+    http://www.gadu-gadu.pl
     http://www.gnugadu.org
+    http://www.hakore.com
 
 =cut

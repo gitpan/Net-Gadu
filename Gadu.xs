@@ -1,3 +1,24 @@
+/*
+ * Net::Gadu 
+ * 
+ * Copyright (C) 2002-2005 Marcin Krzy¿anowski
+ * http://krzak.linux.net.pl
+ * 
+ * This program is free software; you can redistribute it and/or modify 
+ * it under the terms of the GNU Lesser General Public License as published by 
+ * the Free Software Foundation; either version 2 of the License, or 
+ * (at your option) any later version. 
+ * 
+ * This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * GNU General Public License for more details. 
+ * 
+ * You should have received a copy of the GNU Lesser General Public License 
+ * along with this program; if not, write to the Free Software 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -24,35 +45,36 @@ gg_check_event(sess)
 	fd_set rd, wr;
 	struct timeval	tv;
     CODE:
-	
-	    FD_ZERO(&rd);
-	    FD_ZERO(&wr);
-	    
-	    if ((sess->state != GG_STATE_ERROR) &&
+	    if (sess)
+	    {
+	     FD_ZERO(&rd);
+	     FD_ZERO(&wr);
+	     if ((sess->state != GG_STATE_ERROR) &&
 		   (sess->state != GG_STATE_DONE) &&
 		   (sess->state != GG_STATE_IDLE))
-	    {
+	     {
     		    if ((sess->check & GG_CHECK_READ))
 			FD_SET(sess->fd, &rd);
 
 		    if ((sess->check & GG_CHECK_WRITE))
 			FD_SET(sess->fd, &wr);
-	    }
+	     }
 
-	    tv.tv_sec = 0;
-	    tv.tv_usec = 100;
+	     tv.tv_sec = 1;
+	     tv.tv_usec = 0;
 		
-	    if (select(sess->fd + 1, &rd, &wr, NULL, &tv) == -1) 
-	    {
+	     if (select(sess->fd + 1, &rd, &wr, NULL, &tv) == -1) 
+	     {
 		    ret = 0;
-	    } 
-	     else if (sess->state != GG_STATE_IDLE && (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr)))
-	    {
+	     } 
+	      else if (sess->state != GG_STATE_IDLE && (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr)))
+	     {
 	        ret = 1;
-	    }
+	     }
 		
-	    if (sess->state == GG_STATE_IDLE)
+	     if (sess->state == GG_STATE_IDLE)
 		    ret = 0;
+	    }
 
 	RETVAL = ret;
     OUTPUT:
@@ -64,13 +86,14 @@ gg_get_event(sess)
 	Sgg_session	sess;
     PROTOTYPE: $
     PREINIT:
+	gg_pubdir50_t r;
 	struct gg_event *event;
 	HV	* results;
     INIT:
 	results = (HV *)sv_2mortal((SV *)newHV());
     CODE:
 
-	if ((sess != NULL) && 
+	if ((sess) && 
 	    (sess->status != GG_STATUS_NOT_AVAIL) &&
 	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR) && 
 	    (event = gg_watch_fd(sess))) {
@@ -91,6 +114,42 @@ gg_get_event(sess)
 		    hv_store(results,"status",6,newSVnv(event->event.status.status),0);
 		    hv_store(results,"descr",5,newSVpv(event->event.status.descr,0),0);
 		    break;
+		case GG_EVENT_PUBDIR50_SEARCH_REPLY:
+		    {
+			HV *foundlist;
+			HV *details;
+			unsigned int i,count;
+			r = event->event.pubdir50;
+			count = gg_pubdir50_count(r);
+			
+			foundlist = (HV *)sv_2mortal((SV *)newHV());
+			for  (i=0;i<count;i++)
+			{
+			    const char *uin = gg_pubdir50_get(r,i,GG_PUBDIR50_UIN);
+			    const char *first_name = gg_pubdir50_get(r,i,GG_PUBDIR50_FIRSTNAME);
+			    const char *last_name = gg_pubdir50_get(r,i,GG_PUBDIR50_LASTNAME);
+			    const char *nickname = gg_pubdir50_get(r,i,GG_PUBDIR50_NICKNAME);
+			    const char *born = gg_pubdir50_get(r,i,GG_PUBDIR50_BIRTHYEAR);
+			    const char *gender = gg_pubdir50_get(r,i,GG_PUBDIR50_GENDER);
+			    const char *city = gg_pubdir50_get(r,i,GG_PUBDIR50_CITY);
+			    const char *status = gg_pubdir50_get(r,i,GG_PUBDIR50_STATUS);
+
+			    details = (HV *)sv_2mortal((SV *)newHV());
+			    
+			    hv_store(details,"uin",3,newSVpv(uin,0),0);
+			    hv_store(details,"first_name",10,newSVpv(first_name ? first_name : "",0),0);
+			    hv_store(details,"last_name",9,newSVpv(last_name ? last_name : "",0),0);
+			    hv_store(details,"nickname",8,newSVpv(nickname ? nickname : "",0),0);
+			    hv_store(details,"born",4,newSVpv(born ? born : "",0),0);
+			    hv_store(details,"gender",6,newSVpv(gender ? gender : "",0),0);
+			    hv_store(details,"status",6,newSVpv(status ? status : "",0),0);
+
+			    hv_store(foundlist,uin,strlen(uin),newRV((SV *)details),0);
+			}
+			
+			hv_store(results,"results",7,newRV((SV *)foundlist),0);
+		    }
+		    break;
 	    }
 	    gg_free_event(event);
 	    }
@@ -100,94 +159,46 @@ gg_get_event(sess)
     
 
 SV *
-gg_search(nickname,first_name,last_name,city,gender,active)
+gg_search(sess,uin,nickname,first_name,last_name,city,gender,active)
+    Sgg_session	sess;
+    char 	*uin;
     char	*nickname
     char	*first_name
     char	*last_name
     char	*city
-    int		gender
+    char	*gender
     int		active
-    PROTOTYPE: $$$$$$
+    PROTOTYPE: $$$$$$$$$
     INIT:
 	AV	* results;
-	struct gg_search_request *r;
-	struct gg_http	*hr;
-	struct gg_search *s;
-	int i;
-	results = (AV *)sv_2mortal((SV *)newAV());
+	gg_pubdir50_t r;
     CODE:
-	r = gg_search_request_mode_0(nickname, first_name, last_name, city, gender, 0, 0, active, 0);
-	hr = gg_search(r,0);
+	r = gg_pubdir50_new(GG_PUBDIR50_SEARCH_REQUEST);
 
-	if (hr != NULL) {
-	    s  = hr->data;
+	if (uin && strlen(uin) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_UIN,uin);
 
-	    for (i=0;i<s->count;i++) {
-		HV *rh;
-		
-		rh=(HV *)sv_2mortal((SV *)newHV());
-		
-		hv_store(rh,"uin",3,newSVnv(s->results[i].uin),0);
-		hv_store(rh,"first_name",10,newSVpv(s->results[i].first_name,0),0);
-		hv_store(rh,"last_name",9,newSVpv(s->results[i].last_name,0),0);
-		hv_store(rh,"nickname",8,newSVpv(s->results[i].nickname,0),0);
-		hv_store(rh,"born",4,newSVnv(s->results[i].born),0);
-		hv_store(rh,"gender",6,newSVnv(s->results[i].gender),0);
-		hv_store(rh,"city",4,newSVpv(s->results[i].city,0),0);
-		hv_store(rh,"active",6,newSVnv(s->results[i].active),0);
-		
-		av_push(results, newRV((SV *)rh));
-		
-		}
-	    gg_free_search(hr);
-	}
+	if (nickname && strlen(nickname) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_NICKNAME,nickname);
 
-	RETVAL = newRV((SV *)results);
-    OUTPUT:
-	RETVAL
+	if (first_name && strlen(first_name) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_FIRSTNAME,first_name);
 
-SV *
-gg_search_uin(uin,active)
-    int		uin
-    int		active
-    PROTOTYPE: $$
-    INIT:
-	AV	* results;
-	struct gg_search_request *r;
-	struct gg_http	*hr;
-	struct gg_search *s;
-	int i;
-	results = (AV *)sv_2mortal((SV *)newAV());
-    CODE:
-	r = gg_search_request_mode_3(uin,active,0);
-	hr = gg_search(r,0);
-	if (hr != NULL) {
-	    s  = hr->data;
+	if (last_name && strlen(last_name) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_LASTNAME,last_name);
 
-	    for (i=0;i<s->count;i++) {
-		HV *rh;
-		
-		rh=(HV *)sv_2mortal((SV *)newHV());
-		
-		hv_store(rh,"uin",3,newSVnv(s->results[i].uin),0);
-		hv_store(rh,"first_name",10,newSVpv(s->results[i].first_name,0),0);
-		hv_store(rh,"last_name",9,newSVpv(s->results[i].last_name,0),0);
-		hv_store(rh,"nickname",8,newSVpv(s->results[i].nickname,0),0);
-		hv_store(rh,"born",4,newSVnv(s->results[i].born),0);
-		hv_store(rh,"gender",6,newSVnv(s->results[i].gender),0);
-		hv_store(rh,"city",4,newSVpv(s->results[i].city,0),0);
-		hv_store(rh,"active",6,newSVnv(s->results[i].active),0);
-		
-		av_push(results, newRV((SV *)rh));
-		
-		}
-	    gg_free_search(hr);
-	};
-	RETVAL = newRV((SV *)results);
-    OUTPUT:
-	RETVAL
-		
-		
+	if (city && strlen(city) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_CITY,city);
+
+	if (active)
+	    gg_pubdir50_add(r,GG_PUBDIR50_ACTIVE,GG_PUBDIR50_ACTIVE_TRUE);
+
+	if (gender && strlen(gender) > 0)
+	    gg_pubdir50_add(r,GG_PUBDIR50_GENDER,gender);
+
+	
+	gg_pubdir50(sess,r);
+	gg_pubdir50_free(r);
 
 int
 gg_send_message(sess,msgclass,recipient,message)
@@ -196,6 +207,8 @@ gg_send_message(sess,msgclass,recipient,message)
     uin_t	recipient
     const unsigned char	* message
     PROTOTYPE: $$$$
+
+
 
 
 Sgg_session 
@@ -208,6 +221,7 @@ gg_login(uin,password,async,server_addr)
     INIT:
 	struct gg_login_params p;
     CODE:
+	/*gg_debug_level = 255;*/
 	memset(&p, 0, sizeof(p));
 	p.uin = uin;
 	p.password = password;

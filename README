@@ -1,16 +1,8 @@
-Net::Gadu version 1.0
+Net::Gadu version 1.5
 ====================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Module for support Gadu-Gadu protocol.
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
 
 INSTALLATION
 
@@ -23,11 +15,10 @@ To install this module type the following:
 DEPENDENCIES
 
 This module requires these other modules and libraries:
-
-  libgadu.so (part of EKG < http://dev.null.pl/ekg > )
+  libgadu.so - part of EKG http://dev.null.pl/ekg
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2002-2005 Marcin Krzyzanowski
-Licence : LGPL
+Copyright (C) 2002-2005 Marcin Krzy¿anowski, http://krzak.linux.net.pl
+Licence : Lesser General Public License
 

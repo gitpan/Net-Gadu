@@ -1,23 +1,35 @@
 #!/usr/bin/perl
 
+# Example usage of Net::Gadu 
+# 
+# Copyright (C) 2002-2005 Marcin Krzy¿anowski
+# http://krzak.linux.net.pl
+# 
+# This program is free software; you can redistribute it and/or modify 
+# it under the terms of the GNU Lesser General Public License as published by 
+# the Free Software Foundation; either version 2 of the License, or 
+# (at your option) any later version. 
+# 
+# This program is distributed in the hope that it will be useful, 
+# but WITHOUT ANY WARRANTY; without even the implied warranty of 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+# GNU General Public License for more details. 
+# 
+# You should have received a copy of the GNU Lesser General Public License 
+# along with this program; if not, write to the Free Software 
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+
+
 #use ExtUtils::testlib;
-use Net::Gadu;
+use lib '../blib/lib';
+use lib '../blib/arch';
+use Net::Gadu; 
+use Data::Dumper;
 
 my $gg = new Net::Gadu(async=>1);
 
-## SEARCH
-my $res = $gg->search("","Ania","","","female",0);
-foreach my $a (@{$res}) {
-    print $a->{nickname}." ".$a->{uin}." ".$a->{first_name}." ".$a->{last_name}." ".$a->{city}." ".$a->{born}." ".$a->{active}."\n";
-}
-
-#print ($res->[1]->{uin});
-#print ($res->[1]->{first_name});
-#print ($res->[1]->{last_name});
-
-
 ## LOGIN
-$gg->login("111111","password") or die "Login error\n";
+$gg->login("0123456","password") or die "Login error\n";
 
 ## EVENTS(this example, after successful login change status, send message and logout
 while (1) {
@@ -33,16 +45,25 @@ while (1) {
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
-	    $gg->send_message_chat("42112","dziekuje za Net::Gadu :) ");
+	    # Send THANKS to author
+	    $gg->send_message_chat("42112","dziekuje za Net::Gadu");
+	    
+	    # SEARCH INIT
+	    $gg->search("","krzak","","","","male",0);
 	}
 
 	if ($type == $Net::Gadu::EVENT_MSG) {
 	    print $e->{message}." ".$e->{sender}."\n";
 	}
-	
+
+	if ($type == $Net::Gadu::EVENT_SEARCH_REPLY) {
+	    # SEARCH RESULT
+	    print Dumper($e->{results});
+	    $gg->logoff();
+	    exit(1);
+	}
 
 	if ($type == $Net::Gadu::EVENT_ACK) {
-#	    $gg->logoff();
 	}
     }
 }
