@@ -1,8 +1,8 @@
 /*
  * Net::Gadu 
  * 
- * Copyright (C) 2002-2005 Marcin Krzy¿anowski
- * http://krzak.linux.net.pl
+ * Copyright (C) 2002-2006 Marcin Krzy¿anowski
+ * http://hakore.com/
  * 
  * This program is free software; you can redistribute it and/or modify 
  * it under the terms of the GNU Lesser General Public License as published by 
@@ -239,6 +239,14 @@ gg_change_status(sess,status)
     Sgg_session	sess
     int status
 
+
+
+int
+gg_change_status_descr(sess,status,descr)
+    Sgg_session sess
+    int status
+    const unsigned char * descr
+	    
 
 
 void

@@ -1,8 +1,8 @@
 #
 # Net::Gadu 
 # 
-# Copyright (C) 2002-2005 Marcin Krzy¿anowski
-# http://krzak.linux.net.pl
+# Copyright (C) 2002-2006 Marcin Krzy¿anowski
+# http://www.hakore.com
 # 
 # This program is free software; you can redistribute it and/or modify 
 # it under the terms of the GNU Lesser General Public License as published by 
@@ -38,7 +38,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '1.5';
+our $VERSION = '1.6';
 
 
 our $EVENT_NONE = 0;
@@ -90,6 +90,7 @@ sub login {
     $cl->{uin}=$uin;
     $cl->{password}=$password;
     $cl->{session} = Net::Gadu::gg_login($cl->{uin},$cl->{password},$cl->{async},$cl->{server});
+    return $cl->{session};
 }
 
 sub get_event {
@@ -109,8 +110,8 @@ sub ping {
 
 sub logoff {
     my $cl = shift;
-    Net::Gadu::gg_logoff($cl->{session});
-    Net::Gadu::gg_free_session($cl->{session});
+    Net::Gadu::gg_logoff($cl->{session}) if ($cl->{session});
+    Net::Gadu::gg_free_session($cl->{session}) if ($cl->{session});
 }
 
 sub send_message {
@@ -126,6 +127,11 @@ sub send_message_chat {
 sub change_status {
     my ($cl,$status) = @_;
     return Net::Gadu::gg_change_status($cl->{session},$status);
+}
+
+sub change_status_descr {
+    my ($cl,$status,$descr) = @_;
+    return Net::Gadu::gg_change_status_descr($cl->{session},$status,$descr);
 }
 
 sub set_available {
@@ -164,11 +170,15 @@ Net::Gadu - Interfejs do biblioteki libgadu.so dla protoko³u Gadu-Gadu
 Wykorzystuje bibliotekê libgadu.so która jest czesci± projektu EKG.
 Aby zaintalowaæ libgadu.so nale¿y skompilowaæ EKG z opcj± --with-shared. Je¶li u¿ywasz EKG z pakietu prawdopodobnie
 biblioteka ta zosta³a zainstalowana. Szczegó³owe informacje znajdziesz na stronie projektu EKG - http://dev.null.pl/ekg/
-
+Do zbudowania pakietu potrzeba jest zainstalowana biblioteka z prefixem /usr lub /usr/local , jesli lokalizacja jest niestandardowa mozna wyedytowac plik Makefile.PL podajac wlasciwe lokalizacje
 
 =head1 DOWNLOAD
 
-http://krzak.linux.net.pl/perl/Net-Gadu-1.5.tar.gz
+http://search.cpan.org/CPAN/authors/id/K/KR/KRZAK/
+
+=head1 SUBVERSION
+
+$ svn co http://svn.hakore.com/netgadu/trunk
 
 =head1 METHODS
 
@@ -213,12 +223,18 @@ Ustawia status na dostepny. Podobne funkcje : set_busy(), set_invisible(), set_n
 Zmiana statusu mo¿liwa na jeden z:
 
     $Net::Gadu::STATUS_NOT_AVAIL
-    $Net::Gadu::STATUS_NOT_AVAIL_DESCR
     $Net::Gadu::STATUS_AVAIL
-    $Net::Gadu::STATUS_AVAIL_DESCR
     $Net::Gadu::STATUS_BUSY
-    $Net::Gadu::STATUS_BUSY_DESCR
     $Net::Gadu::STATUS_INVISIBLE
+
+
+=item $gg->change_status_descr();
+
+Zmiana statusu z opisem, mo¿liwa na jeden z:
+
+    $Net::Gadu::STATUS_NOT_AVAIL_DESCR
+    $Net::Gadu::STATUS_AVAIL_DESCR
+    $Net::Gadu::STATUS_BUSY_DESCR
     $Net::Gadu::STATUS_INVISIBLE_DESCR
 
 
@@ -295,7 +311,12 @@ Zmiana statusu mo¿liwa na jeden z:
     my $gg = new Net::Gadu(async=>1);
 
     ## LOGIN
-    $gg->login("0123456","password") or die "Login error\n";
+    my $ret = $gg->login("0123456","password") or die "Login error\n";
+    if (!$ret) {
+	print "Login error\n";
+	return;
+    }
+
 
     ## EVENTS(this example, after successful login change status, send message and logout
     while (1) {
@@ -338,7 +359,7 @@ Zmiana statusu mo¿liwa na jeden z:
 
 =head1 AUTHOR
 
-Marcin Krzy¿anowski, http://krzak.linux.net.pl
+Marcin Krzy¿anowski, http://hakore.com/
 
 =head1 LICENCE
 
@@ -346,9 +367,9 @@ Lesser General Public License
 
 =head1 SEE ALSO
 
-    http://dev.null.pl/ekg/
-    http://www.gadu-gadu.pl
-    http://www.gnugadu.org
-    http://www.hakore.com
+    http://www.gadu-gadu.pl/
+    http://www.gnugadu.org/
+    http://ekg.chmurka.net/
+    http://www.hakore.com/
 
 =cut

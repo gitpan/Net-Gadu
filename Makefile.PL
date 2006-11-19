@@ -6,7 +6,7 @@ WriteMakefile(
     ($] >= 5.005 ?
       (ABSTRACT_FROM => 'Gadu.pm', # retrieve abstract from module
        AUTHOR     => 'Marcin Krzyzanowski') : ()),
-    'LIBS'		=> ['-lgadu'],
+    'LIBS'		=> ['-L./ -L/usr/lib -L/usr/local/lib -lgadu'],
 #    'DEFINE'		=> '-ggdb',
-    'INC'		=> '-I/usr/local/include -L/usr/local/lib -L./', # e.g., '-I/usr/include/other'
+    'INC'		=> '-I/usr/include -I/usr/local/include -L./',
 );
