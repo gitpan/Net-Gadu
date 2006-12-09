@@ -1,7 +1,7 @@
-1.6 Nov 19 2006
+1.7 Dec 09 2006
 	* change_status_descr (Dawid Cieszy≈Ñski, dkc at o2.pl)
 	
-1.5 May 26 2006
+1.5 May 26 2005
 	* wyszukiwanie dzia≥a,
 	* zmiana API wyszukiwania
 	* po≥±czenie asynchroniczne jest preferowane

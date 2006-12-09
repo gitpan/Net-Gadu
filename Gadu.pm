@@ -38,7 +38,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '1.6';
+our $VERSION = '1.7';
 
 
 our $EVENT_NONE = 0;
@@ -169,16 +169,18 @@ Net::Gadu - Interfejs do biblioteki libgadu.so dla protoko³u Gadu-Gadu
 
 Wykorzystuje bibliotekê libgadu.so która jest czesci± projektu EKG.
 Aby zaintalowaæ libgadu.so nale¿y skompilowaæ EKG z opcj± --with-shared. Je¶li u¿ywasz EKG z pakietu prawdopodobnie
-biblioteka ta zosta³a zainstalowana. Szczegó³owe informacje znajdziesz na stronie projektu EKG - http://dev.null.pl/ekg/
+biblioteka ta zosta³a zainstalowana. Szczegó³owe informacje znajdziesz na stronie projektu EKG - http://ekg.chmurka.net/
 Do zbudowania pakietu potrzeba jest zainstalowana biblioteka z prefixem /usr lub /usr/local , jesli lokalizacja jest niestandardowa mozna wyedytowac plik Makefile.PL podajac wlasciwe lokalizacje
 
 =head1 DOWNLOAD
 
-http://search.cpan.org/CPAN/authors/id/K/KR/KRZAK/
+http://www.cpan.org/modules/by-module/Net/Net-Gadu-1.7.tar.gz
+
 
 =head1 SUBVERSION
 
 $ svn co http://svn.hakore.com/netgadu/trunk
+
 
 =head1 METHODS
 
@@ -359,7 +361,7 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 
 =head1 AUTHOR
 
-Marcin Krzy¿anowski, http://hakore.com/
+Marcin Krzy¿anowski, http://www.hakore.com/
 
 =head1 LICENCE
 
@@ -368,8 +370,8 @@ Lesser General Public License
 =head1 SEE ALSO
 
     http://www.gadu-gadu.pl/
-    http://www.gnugadu.org/
     http://ekg.chmurka.net/
+    http://www.gnugadu.org/
     http://www.hakore.com/
 
 =cut
