@@ -1,3 +1,10 @@
+1.8 Apr 21 2007
+	* new: gg_add_notify
+	* new: gg_remove_notify
+	* new: EVENT_STATUS60, EVENT_NOTIFY, EVENT_NOTIFY_DESCR, EVENT_NOTIFY60 support
+	* notify EVENT_DISCONNECT if gg_watch_fd() return NULL and avoid loop (Sebastian Zagrodzki, s.zagrodzki at net.icm.edu.pl)
+	* update: example
+	
 1.7 Dec 09 2006
 	* change_status_descr (Dawid Cieszyński, dkc at o2.pl)
 	

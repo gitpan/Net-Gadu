@@ -1,7 +1,7 @@
 #
 # Net::Gadu 
 # 
-# Copyright (C) 2002-2006 Marcin Krzy¿anowski
+# Copyright (C) 2002-2007 Marcin Krzy¿anowski
 # http://www.hakore.com
 # 
 # This program is free software; you can redistribute it and/or modify 
@@ -38,14 +38,16 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '1.7';
+our $VERSION = '1.8';
 
 
 our $EVENT_NONE = 0;
 our $EVENT_MSG = 1;
 our $EVENT_NOTIFY = 2;
+our $EVENT_NOTIFY60 = 23;
 our $EVENT_NOTIFY_DESCR = 3;
 our $EVENT_STATUS = 4;
+our $EVENT_STATUS60 = 22;
 our $EVENT_ACK = 5;
 our $EVENT_PONG = 6; 
 our $EVENT_CONN_FAILED = 7;
@@ -61,7 +63,6 @@ our $STATUS_BUSY = 0x0003;
 our $STATUS_BUSY_DESCR = 0x0005;
 our $STATUS_INVISIBLE = 0x0014;
 our $STATUS_INVISIBLE_DESCR = 0x0016;
-#our $STATUS_BLOCKED = 0x0006
 
 bootstrap Net::Gadu $VERSION;
 
@@ -154,6 +155,15 @@ sub set_invisible {
     $cl->change_status($Net::Gadu::STATUS_INVISIBLE); # GG_STATUS_INVISIBLE
 }
 
+sub add_notify {
+    my ($cl,$uin) = @_;
+    return Net::Gadu::gg_add_notify($cl->{session},$uin);
+}
+
+sub remove_notify {
+    my ($cl,$uin) = @_;
+    return Net::Gadu::gg_remove_notify($cl->{session},$uin);
+}
 
 1;
 
@@ -167,14 +177,14 @@ Net::Gadu - Interfejs do biblioteki libgadu.so dla protoko³u Gadu-Gadu
 
 =head1 DESCRIPTION
 
-Wykorzystuje bibliotekê libgadu.so która jest czesci± projektu EKG.
-Aby zaintalowaæ libgadu.so nale¿y skompilowaæ EKG z opcj± --with-shared. Je¶li u¿ywasz EKG z pakietu prawdopodobnie
-biblioteka ta zosta³a zainstalowana. Szczegó³owe informacje znajdziesz na stronie projektu EKG - http://ekg.chmurka.net/
+Wykorzystuje biblioteke libgadu.so ktora jest czescia projektu EKG.
+Aby zaintalowac libgadu.so nalezy skompilowac EKG z opcja --with-shared. Jesli uzywasz EKG z pakietu prawdopodobnie
+biblioteka ta zostala zainstalowana. Szczegolowe informacje znajdziesz na stronie projektu EKG - http://ekg.chmurka.net/
 Do zbudowania pakietu potrzeba jest zainstalowana biblioteka z prefixem /usr lub /usr/local , jesli lokalizacja jest niestandardowa mozna wyedytowac plik Makefile.PL podajac wlasciwe lokalizacje
 
 =head1 DOWNLOAD
 
-http://www.cpan.org/modules/by-module/Net/Net-Gadu-1.7.tar.gz
+http://www.cpan.org/modules/by-module/Net/Net-Gadu-1.8.tar.gz
 
 
 =head1 SUBVERSION
@@ -197,22 +207,22 @@ Dostepne metody :
 
 =item $gg->login(uin, password);
 
-Po³±czenie z serwerem oraz logowanie do serwera.
+Polaczenie z serwerem oraz logowanie do serwera.
 
 
 =item $gg->logoff();
 
-Wylogowanie z serwera i zakoñczenie sesji.
+Wylogowanie z serwera i zakonczenie sesji.
 
 
 =item $gg->send_message(receiver_uin, message);
 
-Wysy³a wiadomo¶æ pod wskazany numer UIN.
+Wysyla wiadomosc pod wskazany numer UIN.
 
 
 =item $gg->send_message_chat(receiver_uin, message);
 
-Wysy³a wiadomo¶æ pod wskazany numer UIN.
+Wysyla wiadomosc pod wskazany numer UIN.
 
 
 =item $gg->set_available();
@@ -220,9 +230,20 @@ Wysy³a wiadomo¶æ pod wskazany numer UIN.
 Ustawia status na dostepny. Podobne funkcje : set_busy(), set_invisible(), set_not_available(), change_status().
 
 
+=item $gg->add_notify()
+
+MoÅ¼esz uÅ¼yc tej funkcji w celu poinformowania serwera, Å¼e chcesz znaÄ‡ status danej osoby i czekaÄ‡ na zdarzenia zwiazane ze zmiana statusu.
+Zaczynaja dochodzic zdarzenia EVENT_NOTIFY,EVENT_NOTIFY60 gdy ktos sie pojawi oraz EVENT_STATUS,EVENT_STATUS60 gdy ktos zmieni status (patrz opis get_event())
+
+
+=item $gg->remove_notify()
+
+MoÅ¼esz uÅ¼yc tej funkcji w celu poinformowania serwera, Å¼e nie chcesz otrzymywac zdarzen zwiazanych ze zmiana statusu od tej osoby.
+
+
 =item $gg->change_status();
 
-Zmiana statusu mo¿liwa na jeden z:
+Zmiana statusu mozliwa na jeden z:
 
     $Net::Gadu::STATUS_NOT_AVAIL
     $Net::Gadu::STATUS_AVAIL
@@ -232,7 +253,7 @@ Zmiana statusu mo¿liwa na jeden z:
 
 =item $gg->change_status_descr();
 
-Zmiana statusu z opisem, mo¿liwa na jeden z:
+Zmiana statusu z opisem, mozliwa na jeden z:
 
     $Net::Gadu::STATUS_NOT_AVAIL_DESCR
     $Net::Gadu::STATUS_AVAIL_DESCR
@@ -256,12 +277,12 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 
 =item $gg->check_event()
 
-    Sprawdza czy zasz³o jakie¶ zdarzenie (szczegolnie istotne przydatne przy po³aczeniu asynchronicznym)
+    Sprawdza czy zaszlo jakies zdarzenie (szczegolnie istotne przydatne przy polaczeniu asynchronicznym)
     
 
 =item $gg->get_event()
 
-    Zwraca informacje o zdarzeniu które mia³o miejsce, zwracany jest hasz np :
+    Zwraca informacje o zdarzeniu ktore mialo miejsce, zwracany jest hasz np :
 	$e = $gg_event();
 	
     $e->{type} zawiera kod ostatniego zdarzenia
@@ -276,7 +297,26 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 		$e->{status}
 		$e->{seq}
 
-	$Net::Gadu::EVENT_STATUS    # zmiana statusu
+	$Net::Gadu::EVENT_STATUS    # zmiana statusu (wersja klienta Gadu-Gadu < 6.0)
+	        $e->{uin}
+		$e->{status}
+		$e->{descr}
+
+	$Net::Gadu::EVENT_STATUS60    # zmiana statusu (wersja klienta Gadu-Gadu >= 6.0)
+	        $e->{uin}
+		$e->{status}
+		$e->{descr}
+
+	$Net::Gadu::EVENT_NOTIFY    # informacja o pojawieniu sie kogos (wersja klienta Gadu-Gadu < 6.0)
+	        $e->{uin}
+		$e->{status}
+
+	$Net::Gadu::EVENT_NOTIFY_DESCR    # informajca o pojawieniu sie kogos, z opisem (wersja klienta Gadu-Gadu < 6.0)
+	        $e->{uin}
+		$e->{status}
+		$e->{descr}
+
+	$Net::Gadu::EVENT_NOTIFY60    # informacja o pojawieniu sie kogos (wersja klienta Gadu-Gadu >= 6.0)
 	        $e->{uin}
 		$e->{status}
 		$e->{descr}
@@ -290,7 +330,9 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
     $Net::Gadu::EVENT_MSG
     $Net::Gadu::EVENT_NOTIFY
     $Net::Gadu::EVENT_NOTIFY_DESCR
+    $Net::Gadu::EVENT_NOTIFY60
     $Net::Gadu::EVENT_STATUS
+    $Net::Gadu::EVENT_STATUS60
     $Net::Gadu::EVENT_ACK
     $Net::Gadu::EVENT_PONG
     $Net::Gadu::EVENT_CONN_FAILED
@@ -305,24 +347,19 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 
 =over 4
 
-    #!/usr/bin/perl
+#!/usr/bin/perl
 
-    use Net::Gadu; 
-    use Data::Dumper;
+use Net::Gadu; 
+use Data::Dumper;
 
-    my $gg = new Net::Gadu(async=>1);
+my $gg = new Net::Gadu(async=>1);
 
-    ## LOGIN
-    my $ret = $gg->login("0123456","password") or die "Login error\n";
-    if (!$ret) {
-	print "Login error\n";
-	return;
-    }
+## LOGIN
+$gg->login("1234567","password") or die "Login error\n";
 
-
-    ## EVENTS(this example, after successful login change status, send message and logout
-    while (1) {
-     while ($gg->check_event() == 1) {
+## EVENTS(this example, after successful login change status, send message and logout
+while (1) {
+    while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
 
@@ -331,11 +368,28 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
 	    die "Connection failed";
 	}
+
+	if ($type == $Net::Gadu::EVENT_NOTIFY60) {
+	    print "EVENT_NOTIFY60 from ".$e->{uin}."\n" ;
+	}
+
+	if ($type == $Net::Gadu::EVENT_STATUS60) {
+	    print "EVENT_STATUS60 from ".$e->{uin}.", status ".$e->{status}."\n" ;
+	}
+
+	if ($type == $Net::Gadu::EVENT_DISCONNECT) {
+	    die "disconnect";
+	}
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
+
+	    # notify server that you want to receive status notifications
+	    $gg->add_notify("42112");
+
 	    # Send THANKS to author
 	    $gg->send_message_chat("42112","dziekuje za Net::Gadu");
+
 	    
 	    # SEARCH INIT
 	    $gg->search("","krzak","","","","male",0);
@@ -348,14 +402,14 @@ Zmiana statusu z opisem, mo¿liwa na jeden z:
 	if ($type == $Net::Gadu::EVENT_SEARCH_REPLY) {
 	    # SEARCH RESULT
 	    print Dumper($e->{results});
-	    $gg->logoff();
-	    exit(1);
+	    #$gg->logoff();
+	    #exit(1);
 	}
 
 	if ($type == $Net::Gadu::EVENT_ACK) {
 	}
-     }
     }
+}
 
 =back
 

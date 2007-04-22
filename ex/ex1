@@ -2,8 +2,8 @@
 
 # Example usage of Net::Gadu 
 # 
-# Copyright (C) 2002-2005 Marcin Krzy¿anowski
-# http://krzak.linux.net.pl
+# Copyright (C) 2002-2007 Marcin Krzy¿anowski
+# http://www.hakore.com/
 # 
 # This program is free software; you can redistribute it and/or modify 
 # it under the terms of the GNU Lesser General Public License as published by 
@@ -29,7 +29,7 @@ use Data::Dumper;
 my $gg = new Net::Gadu(async=>1);
 
 ## LOGIN
-$gg->login("0123456","password") or die "Login error\n";
+$gg->login("1234567","password") or die "Login error\n";
 
 ## EVENTS(this example, after successful login change status, send message and logout
 while (1) {
@@ -42,11 +42,28 @@ while (1) {
 	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
 	    die "Connection failed";
 	}
+
+	if ($type == $Net::Gadu::EVENT_NOTIFY60) {
+	    print "EVENT_NOTIFY60 from ".$e->{uin}."\n" ;
+	}
+
+	if ($type == $Net::Gadu::EVENT_STATUS60) {
+	    print "EVENT_STATUS60 from ".$e->{uin}.", status ".$e->{status}."\n" ;
+	}
+
+	if ($type == $Net::Gadu::EVENT_DISCONNECT) {
+	    die "disconnect";
+	}
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 	    $gg->set_available();
+
+	    # notify server that you want to receive status notifications
+	    $gg->add_notify("42112");
+
 	    # Send THANKS to author
 	    $gg->send_message_chat("42112","dziekuje za Net::Gadu");
+
 	    
 	    # SEARCH INIT
 	    $gg->search("","krzak","","","","male",0);
@@ -59,8 +76,8 @@ while (1) {
 	if ($type == $Net::Gadu::EVENT_SEARCH_REPLY) {
 	    # SEARCH RESULT
 	    print Dumper($e->{results});
-	    $gg->logoff();
-	    exit(1);
+	    #$gg->logoff();
+	    #exit(1);
 	}
 
 	if ($type == $Net::Gadu::EVENT_ACK) {

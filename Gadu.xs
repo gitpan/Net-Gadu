@@ -86,6 +86,7 @@ gg_get_event(sess)
 	Sgg_session	sess;
     PROTOTYPE: $
     PREINIT:
+	int i;
 	gg_pubdir50_t r;
 	struct gg_event *event;
 	HV	* results;
@@ -95,8 +96,17 @@ gg_get_event(sess)
 
 	if ((sess) && 
 	    (sess->status != GG_STATUS_NOT_AVAIL) &&
-	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR) && 
-	    (event = gg_watch_fd(sess))) {
+	    (sess->status != GG_STATUS_NOT_AVAIL_DESCR)) 
+	    {
+	    
+	    event = gg_watch_fd(sess);
+	    if (!event)
+	    {
+	    	hv_store(results,"type",4,newSVnv(GG_EVENT_DISCONNECT),0);
+	    }
+	    else 
+	    {
+
     	    hv_store(results,"type",4,newSVnv(event->type),0);
 	    switch (event->type) {
 		case GG_EVENT_MSG:
@@ -105,14 +115,36 @@ gg_get_event(sess)
 		    hv_store(results,"message",7,newSVpv(event->event.msg.message,0),0);
 		    break;
 		case GG_EVENT_ACK:
-		    hv_store(results,"recipient",9,newSVnv(event->event.ack.recipient),0);
-		    hv_store(results,"status",6,newSVnv(event->event.ack.status),0);
-		    hv_store(results,"seq",3,newSVnv(event->event.ack.seq),0);
+		    hv_store(results,"recipient",strlen("recipient"),newSVnv(event->event.ack.recipient),0);
+		    hv_store(results,"status",strlen("status"),newSVnv(event->event.ack.status),0);
+		    hv_store(results,"seq",strlen("seq"),newSVnv(event->event.ack.seq),0);
 		    break;
 		case GG_EVENT_STATUS:
-		    hv_store(results,"uin",3,newSVnv(event->event.status.uin),0);
-		    hv_store(results,"status",6,newSVnv(event->event.status.status),0);
-		    hv_store(results,"descr",5,newSVpv(event->event.status.descr,0),0);
+		    hv_store(results,"uin",strlen("uin"),newSVnv(event->event.status.uin),0);
+		    hv_store(results,"status",strlen("status"),newSVnv(event->event.status.status),0);
+		    hv_store(results,"descr",strlen("descr"),newSVpv(event->event.status.descr ? event->event.status.descr : "",0),0);
+		    break;
+		case GG_EVENT_STATUS60:
+		    hv_store(results,"uin",strlen("uin"),newSVnv(event->event.status60.uin),0);
+		    hv_store(results,"status",strlen("status"),newSVnv(event->event.status60.status),0);
+		    hv_store(results,"descr",strlen("descr"),newSVpv(event->event.status60.descr ? event->event.status60.descr : "",0),0);
+		    break;
+		case GG_EVENT_NOTIFY:
+		    hv_store(results,"uin",strlen("uin"),newSVnv(event->event.notify->uin),0);
+		    hv_store(results,"status",strlen("status"),newSVnv(event->event.notify->status),0);
+		    break;
+		case GG_EVENT_NOTIFY_DESCR:
+		    hv_store(results,"uin",strlen("uin"),newSVnv(event->event.notify->uin),0);
+		    hv_store(results,"status",strlen("status"),newSVnv(event->event.notify->status),0);
+		    hv_store(results,"descr",strlen("descr"),newSVpv(event->event.notify_descr.descr ? event->event.notify_descr.descr : "",0),0);
+		    break;
+		case GG_EVENT_NOTIFY60:
+		    for (i = 0; event->event.notify60[i].uin; i++)
+		    {
+			hv_store(results,"uin",3,newSVnv(event->event.notify60[i].uin),0);
+			hv_store(results,"status",6,newSVnv(event->event.notify60[i].status),0);
+			hv_store(results,"descr",5,newSVpv(event->event.notify60[i].descr ? event->event.notify60[0].descr : "",0),0);
+		    }
 		    break;
 		case GG_EVENT_PUBDIR50_SEARCH_REPLY:
 		    {
@@ -150,6 +182,7 @@ gg_get_event(sess)
 			hv_store(results,"results",7,newRV((SV *)foundlist),0);
 		    }
 		    break;
+	    }
 	    }
 	    gg_free_event(event);
 	    }
@@ -246,8 +279,24 @@ gg_change_status_descr(sess,status,descr)
     Sgg_session sess
     int status
     const unsigned char * descr
-	    
 
+
+
+int
+gg_add_notify(sess, uin)
+    Sgg_session sess
+    uin_t	uin
+    PROTOTYPE: $$
+
+
+
+int
+gg_remove_notify(sess, uin)
+    Sgg_session sess
+    uin_t	uin
+    PROTOTYPE: $$
+
+    	    
 
 void
 gg_logoff(sess)
