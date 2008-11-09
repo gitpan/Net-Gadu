@@ -45,13 +45,13 @@ gg_check_event(sess)
 	fd_set rd, wr;
 	struct timeval	tv;
     CODE:
-	    if (sess)
-	    {
+	if (sess)
+	{
+	    
 	     FD_ZERO(&rd);
 	     FD_ZERO(&wr);
-	     if ((sess->state != GG_STATE_ERROR) &&
-		   (sess->state != GG_STATE_DONE) &&
-		   (sess->state != GG_STATE_IDLE))
+	     
+	     if ((sess->state != GG_STATE_ERROR) && (sess->state != GG_STATE_DONE) && (sess->state != GG_STATE_IDLE))
 	     {
     		    if ((sess->check & GG_CHECK_READ))
 			FD_SET(sess->fd, &rd);
@@ -60,21 +60,24 @@ gg_check_event(sess)
 			FD_SET(sess->fd, &wr);
 	     }
 
-	     tv.tv_sec = 1;
-	     tv.tv_usec = 0;
-		
-	     if (select(sess->fd + 1, &rd, &wr, NULL, &tv) == -1) 
-	     {
-		    ret = 0;
-	     } 
-	      else if (sess->state != GG_STATE_IDLE && (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr)))
-	     {
-	        ret = 1;
-	     }
-		
 	     if (sess->state == GG_STATE_IDLE)
+	     {
 		    ret = 0;
+	     }
+
+	    tv.tv_sec = 1;
+	    tv.tv_usec = 0;
+		
+	    if (select(sess->fd + 1, &rd, &wr, NULL, &tv) != -1) 
+	    {
+		if (sess->state != GG_STATE_IDLE && (FD_ISSET(sess->fd, &rd) || FD_ISSET(sess->fd, &wr)))
+    		{
+	    	    ret = 1;
+		}
 	    }
+	     
+	     
+	}
 
 	RETVAL = ret;
     OUTPUT:
@@ -237,7 +240,7 @@ int
 gg_send_message(sess,msgclass,recipient,message)
     Sgg_session	sess
     int	msgclass
-    uin_t	recipient
+    uin_t recipient
     const unsigned char	* message
     PROTOTYPE: $$$$
 
@@ -245,22 +248,31 @@ gg_send_message(sess,msgclass,recipient,message)
 
 
 Sgg_session 
-gg_login(uin,password,async,server_addr)
+gg_login(uin,password,async,server_addr,initial_status)
     uin_t	uin
     char 	*password
     int 	async
     char	*server_addr
+    int		initial_status
     PROTOTYPE: $$$$$
     INIT:
 	struct gg_login_params p;
     CODE:
-	/*gg_debug_level = 255;*/
+	/* gg_debug_level = 255; */
+	
 	memset(&p, 0, sizeof(p));
 	p.uin = uin;
 	p.password = password;
 	p.async = async;
-	p.status = 0x0002;
-	p.server_addr = inet_addr(server_addr);
+	p.status = initial_status;
+	p.has_audio = 0;
+	p.image_size = 255;
+	
+	if (!strcmp(server_addr,"0.0.0.0"))
+	{
+	    p.server_addr = inet_addr(server_addr);
+	}
+	
 	RETVAL = gg_login(&p);
 	ST(0) = sv_newmortal();
 	sv_setref_pv(ST(0), "Sgg_session", (void*)RETVAL);
@@ -281,6 +293,15 @@ gg_change_status_descr(sess,status,descr)
     const unsigned char * descr
 
 
+int gg_notify(sess)
+    Sgg_session sess
+    PROTOTYPE: $
+    INIT:
+	int ret;
+    CODE:
+        ret = gg_notify(sess, NULL, 0);
+	RETVAL = ret;
+    
 
 int
 gg_add_notify(sess, uin)
@@ -295,8 +316,7 @@ gg_remove_notify(sess, uin)
     Sgg_session sess
     uin_t	uin
     PROTOTYPE: $$
-
-    	    
+    
 
 void
 gg_logoff(sess)

@@ -1,10 +1,13 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Net-Gadu
-version:      1.8
-version_from: Gadu.pm
-installdirs:  site
-requires:
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30_01
+--- #YAML:1.0
+name:                Net-Gadu
+version:             1.9
+abstract:            Interfejs do biblioteki libgadu.so dla protokołu komunikatora Gadu-Gadu 
+license:             ~
+author:              
+    - Marcin Krzyzanowski
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

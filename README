@@ -1,4 +1,4 @@
-Net::Gadu version 1.8
+Net::Gadu version 1.9
 ====================
 
 Module for support Gadu-Gadu protocol.
@@ -23,5 +23,5 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2002-2007 Marcin Krzyzanowski, http://hakore.com/
+Copyright (C) 2002-2008 Marcin Krzyzanowski, http://hakore.com/
 Licence : Lesser General Public License v. 2.0

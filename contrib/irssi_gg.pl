@@ -136,6 +136,7 @@ sub eventloop {
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
 		Irssi::printformat(MSGLEVEL_NOTICES,'gginfo',"polaczenie udane gratuluje");
     		$ping_tag = Irssi::timeout_add(10000,\&gg_ping,$gg);
+    		$gu->notify();
 	        $gu->set_available();
 		return;
 	}

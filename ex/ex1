@@ -26,7 +26,7 @@ use lib '../blib/arch';
 use Net::Gadu; 
 use Data::Dumper;
 
-my $gg = new Net::Gadu(async=>1);
+my $gg = new Net::Gadu(async => 1);
 
 ## LOGIN
 $gg->login("1234567","password") or die "Login error\n";
@@ -36,7 +36,6 @@ while (1) {
     while ($gg->check_event() == 1) {
 
 	my $e = $gg->get_event();
-
 	my $type = $e->{type};
 	
 	if ($type == $Net::Gadu::EVENT_CONN_FAILED) {
@@ -56,7 +55,8 @@ while (1) {
 	}
 	
 	if ($type == $Net::Gadu::EVENT_CONN_SUCCESS) {
-	    $gg->set_available();
+	    # need to be sent after connection success
+	    $gg->notify();
 
 	    # notify server that you want to receive status notifications
 	    $gg->add_notify("42112");
